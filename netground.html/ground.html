@@ -3,389 +3,1054 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Net Grounds Booking - Pro Sports App</title>
+<title>Net Grounds - Book Your Slot</title>
 
-<!-- Leaflet CSS for map -->
+<!-- leaflet for map stuff -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
 <style>
+/* 
+  Started this project on a weekend lol
+  Kept adding features as clients asked
+  - Ravi, March 2024
+*/
+
 :root {
-  --primary: #8b0000;
-  --primary-dark: #3b0000;
+  --red: #8b0000;
+  --red-dark: #3b0000;
   --gold: #ffcc66;
-  --green: #218838;
-  --red: #d00000;
+  --ok: #218838;
+  --danger: #d00000;
   --bg: #f5f6fa;
-  --card: #ffffff;
-  --text: #242424;
-  --muted: #777;
-  --border: #ddd;
+  --white: #ffffff;
+  --txt: #242424;
+  --grey: #777;
+  --line: #ddd;
   --shadow: 0 15px 35px rgba(0,0,0,.12);
 }
 
+/* dark mode - client asked for this last minute */
 body.dark {
   --bg: #151515;
-  --card: #242424;
-  --text: #f4f4f4;
-  --muted: #bbb;
-  --border: #555;
+  --white: #242424;
+  --txt: #f4f4f4;
+  --grey: #bbb;
+  --line: #555;
   --shadow: 0 15px 35px rgba(0,0,0,.35);
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+
 body {
   margin: 0;
-  font-family: Poppins, Arial, sans-serif;
-  color: var(--text);
+  font-family: 'Poppins', sans-serif;
   background: var(--bg);
-  transition: background .25s, color .25s;
+  color: var(--txt);
+  transition: background 0.2s, color 0.2s;
 }
+
+html { scroll-behavior: smooth; }
 
 button, input, select, textarea { font: inherit; }
 button { cursor: pointer; }
-.hidden { display: none !important; }
+.hide { display: none !important; }
 
-/* ================= TOAST NOTIFICATIONS ================= */
-#toastContainer {
+/* ---- toast popups ---- */
+#toasts {
   position: fixed;
-  bottom: 25px;
-  right: 25px;
+  bottom: 20px;
+  right: 20px;
   z-index: 9999;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-.toast {
-  min-width: 280px;
-  padding: 14px 18px;
-  border-radius: 10px;
-  color: white;
-  background: #333;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-  font-size: 13px;
-  animation: slideInToast .3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.toast.success { background: var(--green); }
-.toast.error { background: var(--red); }
-.toast.info { background: #1877f2; }
-@keyframes slideInToast {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+  gap: 8px;
 }
 
-/* ================= LOGIN ================= */
-#loginPage {
+.toast {
+  padding: 13px 16px;
+  min-width: 260px;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 13px;
+  background: #444;
+  box-shadow: 0 8px 20px rgba(0,0,0,.25);
+  display: flex;
+  justify-content: space-between;
+  animation: toastIn .25s ease;
+}
+.toast.ok { background: #218838; }
+.toast.bad { background: #d00000; }
+.toast.note { background: #0d6efd; }
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(80px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ======= LOGIN ======= */
+#loginWrap {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 25px;
-  background: linear-gradient(rgba(35,0,0,.74), rgba(35,0,0,.8)), url("https://images.unsplash.com/photo-1531415074968-036ba1b575da") center/cover no-repeat;
+  padding: 20px;
+  background:
+    linear-gradient(rgba(30,0,0,.75), rgba(30,0,0,.8)),
+    url('https://images.unsplash.com/photo-1531415074968-036ba1b575da')
+    center / cover no-repeat;
 }
-.login-box {
-  width: min(420px, 100%);
-  padding: 34px 28px;
-  border-radius: 24px;
-  text-align: center;
+
+.login-card {
+  width: min(410px, 100%);
+  padding: 32px 26px;
+  border-radius: 22px;
   background: rgba(255,255,255,.97);
-  box-shadow: 0 25px 70px rgba(0,0,0,.42);
+  box-shadow: 0 20px 60px rgba(0,0,0,.4);
+  text-align: center;
 }
-.login-logo {
-  width: 75px; height: 75px; margin: auto; display: grid; place-items: center;
-  border-radius: 50%; color: var(--gold); background: var(--primary); font-size: 38px;
-}
-.login-box h2 { margin: 16px 0 5px; color: var(--primary); }
-.login-subtitle { color: #777; font-size: 14px; }
-.login-box input { width: 100%; padding: 13px; margin-top: 11px; border: 1px solid #ccc; border-radius: 9px; outline: none; }
 
-.social-btn, .otp-btn, .demo-btn {
-  width: 100%; padding: 13px; margin-top: 12px; border: 0; border-radius: 9px; font-weight: bold; transition: .2s;
+.login-icon {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: var(--red);
+  color: var(--gold);
+  font-size: 36px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto;
 }
-.social-btn:hover, .otp-btn:hover, .demo-btn:hover { transform: translateY(-2px); opacity: .9; }
-.google-btn { color: #333; background: white; border: 1px solid #ddd; }
-.facebook-btn { color: white; background: #1877f2; }
-.otp-btn { color: white; background: var(--primary); }
-.demo-btn { color: var(--primary); background: var(--gold); }
-.divider { display: flex; gap: 10px; align-items: center; margin: 22px 0 12px; color: #999; font-size: 12px; }
-.divider::before, .divider::after { content: ""; height: 1px; flex: 1; background: #ddd; }
-#loginError { min-height: 20px; color: var(--red); font-size: 13px; }
-#demoOtp { display: none; padding: 9px; margin-top: 10px; border-radius: 8px; color: #7a5400; background: #fff3c4; font-size: 13px; }
 
-/* ================= NAVIGATION ================= */
-#mainSite { display: none; }
-.topnav {
-  position: sticky; top: 0; z-index: 100; min-height: 66px; padding: 12px 3%;
-  display: flex; justify-content: space-between; align-items: center; gap: 10px;
-  color: white; background: var(--primary); box-shadow: 0 3px 15px rgba(0,0,0,.2);
+.login-card h2 {
+  margin: 14px 0 4px;
+  color: var(--red);
 }
-.brand { color: var(--gold); font-size: 19px; font-weight: bold; white-space: nowrap; }
-.nav-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.nav-actions button {
-  padding: 8px 11px; border: 0; border-radius: 8px; font-size: 11px; font-weight: bold; background: white; color: var(--primary);
-}
-#userName { max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
-#adminBtn { color: var(--primary); background: var(--gold); }
 
-/* ================= HERO ================= */
+.login-card small {
+  color: #888;
+  font-size: 13px;
+}
+
+.login-card input {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+}
+
+.login-card input:focus { border-color: var(--red); }
+
+/* social buttons */
+.social-row { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+.btn-google, .btn-fb, .btn-otp, .btn-demo {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: transform .15s, opacity .15s;
+}
+.btn-google:hover, .btn-fb:hover,
+.btn-otp:hover, .btn-demo:hover {
+  transform: translateY(-1px);
+  opacity: .88;
+}
+
+.btn-google { background: #fff; color: #333; border: 1px solid #ddd; }
+.btn-fb     { background: #1877f2; color: #fff; }
+.btn-otp    { background: var(--red); color: #fff; }
+.btn-demo   { background: var(--gold); color: var(--red); }
+
+.or-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #aaa;
+  font-size: 12px;
+  margin: 18px 0 10px;
+}
+.or-divider::before,
+.or-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #ddd;
+}
+
+#loginErr { color: #d00000; font-size: 13px; min-height: 18px; margin-top: 8px; }
+
+/* little otp hint box */
+#otpHint {
+  display: none;
+  padding: 8px 12px;
+  margin-top: 8px;
+  border-radius: 7px;
+  background: #fff8d6;
+  color: #7a5400;
+  font-size: 12px;
+}
+
+/* ======= NAV ======= */
+#app { display: none; }
+
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 4%;
+  background: var(--red);
+  color: white;
+  box-shadow: 0 3px 12px rgba(0,0,0,.2);
+}
+
+.brand { color: var(--gold); font-size: 18px; font-weight: 700; }
+
+.nav-btns {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.nav-btns button {
+  padding: 7px 10px;
+  border: none;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #fff;
+  color: var(--red);
+}
+
+.nav-btns button#adminBtn { background: var(--gold); }
+#navUser { font-size: 12px; max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ======= HERO ======= */
 .hero {
-  min-height: 550px; position: relative; display: flex; align-items: center; padding: 50px 7%;
-  color: white; background: linear-gradient(90deg, rgba(45,0,0,.84), rgba(45,0,0,.22)), url("https://images.unsplash.com/photo-1540747913346-19e32dc3e97e") center/cover no-repeat;
+  min-height: 540px;
+  display: flex;
+  align-items: center;
+  padding: 50px 8%;
+  color: white;
+  background:
+    linear-gradient(90deg, rgba(40,0,0,.85) 40%, rgba(40,0,0,.2)),
+    url('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e')
+    center / cover no-repeat;
 }
-.hero-content { max-width: 680px; }
-.hero h1 { margin: 0; font-size: clamp(34px, 5vw, 65px); line-height: 1.05; }
-.hero h1 span { color: var(--gold); }
-.hero p { max-width: 600px; margin: 20px 0; font-size: 16px; line-height: 1.6; }
-.hero-buttons, .hero-badges { display: flex; flex-wrap: wrap; gap: 11px; }
-.hero-badges { margin-top: 20px; }
-.hero-badges span { padding: 7px 12px; border-radius: 30px; color: white; background: rgba(255,255,255,.16); font-size: 12px; }
 
-.primary-btn, .secondary-btn { padding: 13px 21px; border: 0; border-radius: 10px; font-weight: bold; }
-.primary-btn { color: var(--primary); background: var(--gold); }
-.secondary-btn { color: white; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.5); }
-
-/* ================= OFFERS & WEATHER STRIP ================= */
-.strips-container { max-width: 1100px; margin: -28px auto 30px; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; position: relative; z-index: 2; }
-.strip-card {
-  padding: 18px 22px; border-radius: 15px; color: white; background: linear-gradient(90deg, #8b0000, #c72c2c);
-  box-shadow: 0 15px 35px rgba(139,0,0,.3); display: flex; justify-content: space-between; align-items: center; gap: 15px;
+.hero-text { max-width: 640px; }
+.hero-text h1 {
+  margin: 0;
+  font-size: clamp(32px, 5vw, 62px);
+  line-height: 1.08;
 }
-.strip-card.weather { background: linear-gradient(90deg, #1877f2, #3b5998); }
-.strip-card small { display: block; color: var(--gold); font-weight: bold; }
-.strip-card strong { display: block; margin-top: 4px; font-size: 15px; }
-.strip-card button { padding: 10px 15px; border: 0; border-radius: 8px; color: var(--primary); background: var(--gold); font-weight: bold; }
-.strip-card.weather button { color: #1877f2; background: white; }
+.hero-text h1 em { color: var(--gold); font-style: normal; }
+.hero-text p { margin: 18px 0; font-size: 15px; line-height: 1.65; max-width: 540px; }
 
-/* ================= SECTIONS & CARDS ================= */
-.section { max-width: 1100px; margin: 45px auto; padding: 0 20px; }
-.section-title { color: var(--primary); text-align: center; font-size: 28px; margin-bottom: 8px; }
-.section-subtitle { color: var(--muted); text-align: center; margin-top: 0; font-size: 14px; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 
-.feature-grid, .testimonial-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 18px; margin-top: 22px; }
-.feature-card, .testimonial, .admin-card, .booking, .profile-card, .leaderboard-card, .team-card {
-  padding: 22px; border-radius: 16px; background: var(--card); box-shadow: var(--shadow);
+.btn-primary, .btn-outline {
+  padding: 12px 20px;
+  border-radius: 9px;
+  border: none;
+  font-weight: 700;
 }
-.feature-card { text-align: center; transition: .25s; }
-.feature-card:hover { transform: translateY(-5px); }
-.feature-card span { font-size: 35px; }
-.feature-card h3 { color: var(--primary); margin: 12px 0 6px; }
+.btn-primary { background: var(--gold); color: var(--red); }
+.btn-outline  { background: rgba(255,255,255,.15); color: #fff; border: 1px solid rgba(255,255,255,.5); }
 
-/* ================= NEW FEATURES STYLING ================= */
+.hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+.hero-tags span {
+  padding: 6px 12px;
+  border-radius: 30px;
+  background: rgba(255,255,255,.14);
+  font-size: 12px;
+}
 
-/* Leaderboard */
-.leaderboard-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-.leaderboard-table th, .leaderboard-table td { padding: 12px; border-bottom: 1px solid var(--border); text-align: left; font-size: 13px; }
-.leaderboard-table th { color: var(--gold); background: var(--primary); }
+/* ======= OFFER STRIPS ======= */
+.strips {
+  max-width: 1080px;
+  margin: -26px auto 28px;
+  padding: 0 18px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 14px;
+  position: relative;
+  z-index: 3;
+}
 
-/* Teams & Find Players */
-.team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
-.team-form input, .team-form select, .team-form textarea { width: 100%; padding: 11px; margin-top: 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); }
-.team-form button { margin-top: 12px; width: 100%; padding: 12px; border: 0; border-radius: 8px; background: var(--primary); color: white; font-weight: bold; }
+/* I just used the same card style for both - easier to maintain */
+.strip {
+  padding: 16px 20px;
+  border-radius: 14px;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 12px 30px rgba(0,0,0,.2);
+}
+.strip.deal    { background: linear-gradient(90deg, #8b0000, #c72c2c); }
+.strip.weather { background: linear-gradient(90deg, #1565c0, #42a5f5); }
 
-/* AI Assistant Widget */
-.ai-widget { max-width: 800px; margin: 30px auto; padding: 22px; border-radius: 16px; background: linear-gradient(135deg, #2b0000, #5c0000); color: white; box-shadow: var(--shadow); }
-.ai-chat-box { height: 160px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 10px; margin: 12px 0; font-size: 13px; display: flex; flex-direction: column; gap: 8px; }
-.ai-msg { padding: 8px 12px; border-radius: 8px; max-width: 80%; }
-.ai-msg.user { background: var(--gold); color: #333; align-self: flex-end; }
-.ai-msg.bot { background: rgba(255,255,255,0.15); align-self: flex-start; }
-.ai-input-box { display: flex; gap: 10px; }
-.ai-input-box input { flex: 1; padding: 11px; border-radius: 8px; border: 0; outline: none; }
-.ai-input-box button { padding: 11px 20px; border-radius: 8px; border: 0; background: var(--gold); color: var(--primary); font-weight: bold; }
+.strip small  { display: block; color: var(--gold); font-weight: 700; font-size: 12px; }
+.strip strong { display: block; margin-top: 3px; font-size: 14px; }
 
-/* Profile & Achievements */
-.profile-flex { display: flex; flex-wrap: wrap; gap: 25px; align-items: center; }
-.avatar-circle { width: 80px; height: 80px; border-radius: 50%; background: var(--primary); color: var(--gold); display: grid; place-items: center; font-size: 32px; font-weight: bold; }
-.badge-list { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-.badge { padding: 6px 12px; border-radius: 20px; background: #fff3c4; color: #7a5400; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+.strip button {
+  padding: 9px 14px;
+  border: none;
+  border-radius: 7px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.strip.deal button    { background: var(--gold); color: var(--red); }
+.strip.weather button { background: white; color: #1565c0; }
 
-/* Wallet & Referral */
-.wallet-box { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; padding: 20px; border-radius: 14px; background: var(--card); box-shadow: var(--shadow); margin-top: 20px; }
-.wallet-balance { font-size: 24px; color: var(--green); font-weight: bold; }
+/* ======= GENERIC SECTION ======= */
+.section {
+  max-width: 1080px;
+  margin: 44px auto;
+  padding: 0 18px;
+}
 
-/* Spin Wheel */
-#spinSection { max-width: 500px; margin: 40px auto; padding: 20px; text-align: center; background: var(--card); border-radius: 18px; box-shadow: var(--shadow); border: 2px solid var(--gold); }
-#wheelContainer { position: relative; width: 240px; height: 240px; margin: 20px auto; }
+.sec-title {
+  text-align: center;
+  color: var(--red);
+  font-size: 26px;
+  margin-bottom: 6px;
+}
+.sec-sub {
+  text-align: center;
+  color: var(--grey);
+  font-size: 13px;
+  margin-top: 0;
+}
+
+/* ======= AI WIDGET ======= */
+.ai-box {
+  max-width: 780px;
+  margin: 30px auto;
+  padding: 20px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #2b0000, #5c0000);
+  color: white;
+  box-shadow: var(--shadow);
+}
+
+.ai-box h3 { margin: 0 0 5px; color: var(--gold); }
+.ai-box p  { margin: 0 0 10px; font-size: 13px; color: #ddd; }
+
+.chat-area {
+  height: 150px;
+  overflow-y: auto;
+  padding: 10px;
+  background: rgba(0,0,0,.3);
+  border-radius: 9px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 13px;
+}
+
+.msg {
+  padding: 7px 11px;
+  border-radius: 8px;
+  max-width: 78%;
+}
+.msg.user { background: var(--gold); color: #333; align-self: flex-end; }
+.msg.bot  { background: rgba(255,255,255,.15); align-self: flex-start; }
+
+.ai-row { display: flex; gap: 8px; }
+.ai-row input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+}
+.ai-row button {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  background: var(--gold);
+  color: var(--red);
+  font-weight: 700;
+}
+
+/* ======= SPIN WHEEL ======= */
+#spinWrap {
+  max-width: 440px;
+  margin: 40px auto;
+  padding: 22px;
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  border: 2px solid var(--gold);
+  text-align: center;
+}
+
+.wheel-holder {
+  width: 220px;
+  height: 220px;
+  position: relative;
+  margin: 16px auto;
+}
+
 #wheel {
-  width: 100%; height: 100%; border-radius: 50%; border: 6px solid var(--primary);
-  background: conic-gradient(#ffcc66 0deg 90deg, #ff9900 90deg 180deg, #ff6600 180deg 270deg, #ff3300 270deg 360deg);
-  transition: transform 3s cubic-bezier(.2,.8,.2,1);
-}
-#spinArrow {
-  position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
-  width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 22px solid var(--primary); z-index: 2;
-}
-#spinBtn { margin-top: 15px; padding: 12px 28px; border: 0; border-radius: 9px; color: white; background: var(--primary); font-weight: bold; font-size: 15px; }
-#spinResult { margin-top: 12px; font-weight: bold; color: var(--primary); }
-
-/* Location & Map */
-.location-panel { max-width: 1100px; margin: 30px auto; padding: 20px; display: flex; justify-content: space-between; align-items: center; gap: 15px; border-radius: 15px; background: var(--card); box-shadow: var(--shadow); }
-.location-panel h3 { margin: 0 0 5px; color: var(--primary); }
-.location-panel p { margin: 0; color: var(--muted); font-size: 14px; }
-.location-btn { padding: 11px 16px; border: 0; border-radius: 9px; color: white; background: var(--primary); font-weight: bold; }
-#mapSection { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
-#map { height: 380px; border-radius: 15px; box-shadow: var(--shadow); }
-
-/* ================= BOOKING ================= */
-.booking { max-width: 800px; margin: 45px auto; padding: 30px; border-radius: 18px; background: var(--card); box-shadow: var(--shadow); }
-.booking h2 { margin-top: 0; color: var(--primary); text-align: center; }
-.steps { display: flex; justify-content: space-between; gap: 7px; margin: 28px 0; }
-.step-dot { flex: 1; color: #999; text-align: center; font-size: 12px; }
-.step-dot .circle { width: 34px; height: 34px; line-height: 34px; margin: auto auto 5px; border-radius: 50%; color: white; background: #ccc; font-weight: bold; }
-.step-dot.active { color: var(--primary); font-weight: bold; }
-.step-dot.active .circle { background: var(--primary); }
-.step-dot.done .circle { background: var(--green); }
-.step-slide { display: none; }
-.step-slide.active { display: block; animation: slideIn .3s ease; }
-@keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
-
-label { display: block; margin-top: 15px; font-weight: bold; font-size: 13px; }
-.booking input, .booking select, .booking textarea {
-  width: 100%; padding: 11px; margin-top: 5px; color: var(--text); background: var(--card); border: 1px solid var(--border); border-radius: 7px; outline: none;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 5px solid var(--red);
+  /* 4 segments - good enough */
+  background: conic-gradient(
+    #ffcc66 0deg 90deg,
+    #ff9900 90deg 180deg,
+    #ff6600 180deg 270deg,
+    #ff3300 270deg 360deg
+  );
+  transition: transform 3s cubic-bezier(.17,.84,.17,1);
 }
 
-/* Ground Cards */
-.pitch-box { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 12px; }
-.pitch { overflow: hidden; text-align: center; border: 2px solid transparent; border-radius: 10px; background: var(--bg); cursor: pointer; transition: .2s; position: relative; }
-.pitch:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
-.pitch.selected { border-color: var(--primary); background: #fff2f2; }
-.pitch img { width: 100%; height: 95px; object-fit: cover; }
-.pitch p { margin: 7px 0 3px; font-weight: bold; font-size: 13px; }
-.available-label { display: block; margin-bottom: 6px; color: var(--green); font-size: 11px; }
+.wheel-arrow {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 20px solid var(--red);
+  z-index: 2;
+}
 
-/* Time Slots */
-.time-slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 9px; margin-top: 10px; }
-.time-slot { padding: 11px 6px; border: 1px solid #b9e4bd; border-radius: 8px; color: #187b18; background: #f1fff2; font-size: 11px; font-weight: bold; }
-.time-slot.booked { color: #c00000; background: #fff0f0; border-color: #ffb4b4; cursor: not-allowed; }
-.time-slot.maintenance { color: #765200; background: #fff2bf; border-color: #e6c75f; cursor: not-allowed; }
-.time-slot.selected { color: white; background: var(--primary); border-color: var(--primary); }
-.slot-message { padding: 10px; margin-top: 10px; border-radius: 8px; color: #805d00; background: #fff8e6; font-size: 12px; }
+#spinBtn {
+  margin-top: 12px;
+  padding: 11px 26px;
+  border: none;
+  border-radius: 8px;
+  background: var(--red);
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+}
 
-/* Timetable */
-.timetable-box { overflow-x: auto; margin-top: 15px; border: 1px solid var(--border); border-radius: 10px; }
-.timetable { width: 100%; min-width: 600px; border-collapse: collapse; font-size: 12px; }
-.timetable th { color: var(--gold); background: var(--primary); padding: 10px; }
-.timetable th, .timetable td { padding: 10px; border: 1px solid var(--border); text-align: center; }
-.slot-available { color: #167a24; background: #eaffed; font-weight: bold; }
-.slot-booked { color: #b00000; background: #ffe5e5; font-weight: bold; }
-.slot-maintenance { color: #765200; background: #fff2bf; font-weight: bold; }
+#spinResult { margin-top: 10px; font-weight: 700; color: var(--red); min-height: 20px; }
 
-.amount-box { margin-top: 16px; padding: 14px; border: 1px dashed var(--gold); border-radius: 8px; color: #6a4d00; background: #fff8e6; text-align: center; font-size: 18px; }
-#captchaBox { padding: 12px; margin-top: 8px; border-radius: 7px; color: var(--gold); background: #222; text-align: center; letter-spacing: 8px; font-size: 20px; font-weight: bold; user-select: none; }
-#qrBox { display: none; margin-top: 15px; text-align: center; }
-#qrImage { width: 180px; max-width: 100%; border: 1px solid #ccc; border-radius: 8px; }
+/* ======= LEADERBOARD ======= */
+.lb-table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+.lb-table th, .lb-table td {
+  padding: 11px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  font-size: 13px;
+}
+.lb-table th { background: var(--red); color: var(--gold); }
 
-.nav-btns { display: flex; gap: 10px; margin-top: 22px; }
-.nav-btns button { flex: 1; padding: 12px; border: 0; border-radius: 7px; font-weight: bold; }
-#prevBtn { color: #333; background: #ddd; }
-#nextBtn { color: var(--gold); background: var(--primary); }
-#bookBtn { color: white; background: var(--green); }
-.error { display: none; margin-top: 8px; color: red; font-size: 12px; }
-#msg { margin-top: 18px; text-align: center; font-weight: bold; }
-.success { color: green; }
+/* ======= TEAMS ======= */
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 18px;
+  margin-top: 18px;
+}
 
-/* ================= ADMIN & HISTORY ================= */
-#adminPage { display: none; max-width: 1180px; margin: 35px auto; padding: 0 18px; }
-#adminPage h2 { color: var(--primary); }
-.admin-login { max-width: 400px; padding: 20px; border-radius: 12px; background: var(--card); box-shadow: var(--shadow); }
-.admin-login input, .admin-login select { width: 100%; padding: 10px; margin-top: 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); color: var(--text); }
-.admin-login button { width: 100%; padding: 10px; margin-top: 10px; border: 0; border-radius: 6px; color: white; background: var(--primary); font-weight: bold; }
-.admin-tools { display: none; }
-.stats { display: flex; flex-wrap: wrap; gap: 15px; margin: 20px 0; }
-.stat-box { flex: 1; min-width: 160px; padding: 18px; border-radius: 12px; color: var(--gold); background: var(--primary); text-align: center; }
-.stat-box h3 { margin: 0; font-size: 26px; }
-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-th { padding: 11px; color: var(--gold); background: var(--primary); text-align: left; white-space: nowrap; }
-td { padding: 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
-tr:hover td { background: rgba(139,0,0,.05); }
-.del-btn, .cancel-btn { padding: 5px 10px; border: 0; border-radius: 4px; color: white; background: red; font-size: 11px; }
-.block-btn { padding: 6px 10px; border: 0; border-radius: 4px; color: white; background: #765200; }
+.card {
+  padding: 20px;
+  border-radius: 14px;
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
 
-.history-box { display: none; max-width: 1100px; margin: 35px auto; padding: 0 20px; }
-.history-card { padding: 16px; margin-top: 12px; border-left: 5px solid var(--primary); border-radius: 10px; background: var(--card); box-shadow: var(--shadow); }
-.history-card h3 { margin: 0; color: var(--primary); font-size: 16px; }
-.history-card p { color: var(--muted); font-size: 13px; margin: 6px 0; }
+.card h3 { margin: 0 0 12px; color: var(--red); }
 
-/* Reviews */
-.review-form { max-width: 600px; margin: 25px auto; padding: 20px; border-radius: 14px; background: var(--card); box-shadow: var(--shadow); }
-.review-form input, .review-form select, .review-form textarea { width: 100%; padding: 10px; margin-top: 8px; border: 1px solid var(--border); border-radius: 7px; background: var(--card); color: var(--text); }
-.review-form button { width: 100%; padding: 11px; margin-top: 10px; border: 0; border-radius: 7px; color: white; background: var(--primary); font-weight: bold; }
-.review-list { max-width: 900px; margin: 20px auto; }
-.review-card { padding: 16px; margin-top: 10px; border-radius: 10px; background: var(--card); box-shadow: var(--shadow); }
-.review-card strong { color: var(--primary); }
-.review-stars { color: #f5a400; }
+.card input, .card select, .card textarea {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-top: 7px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--white);
+  color: var(--txt);
+}
 
-.footer { padding: 25px 15px; color: #eee; background: #280000; text-align: center; font-size: 12px; }
+.card button.save-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 11px;
+  border: none;
+  border-radius: 7px;
+  background: var(--red);
+  color: white;
+  font-weight: 700;
+}
 
-/* Mobile */
-@media (max-width: 768px) {
-  .topnav { flex-direction: column; align-items: flex-start; padding: 10px 4%; }
-  .nav-actions { width: 100%; justify-content: space-between; }
-  .hero { min-height: 480px; padding: 35px 5%; }
-  .strips-container { grid-template-columns: 1fr; }
+#teamFeedback { font-size: 12px; margin-top: 7px; }
+
+/* ======= WALLET ======= */
+.wallet-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 13px;
+  background: var(--white);
+  box-shadow: var(--shadow);
+  margin-top: 16px;
+}
+
+.wallet-row small { color: var(--grey); font-size: 12px; }
+.w-amount { font-size: 22px; font-weight: 700; color: var(--ok); }
+
+.btn-action {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  background: var(--red);
+  color: white;
+  font-weight: 600;
+}
+
+/* ======= LOCATION ======= */
+.loc-bar {
+  max-width: 1080px;
+  margin: 28px auto 0;
+  padding: 18px 22px;
+  border-radius: 13px;
+  background: var(--white);
+  box-shadow: var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.loc-bar h3 { margin: 0 0 4px; color: var(--red); }
+.loc-bar p  { margin: 0; font-size: 13px; color: var(--grey); }
+
+#mapDiv { height: 360px; border-radius: 14px; box-shadow: var(--shadow); }
+
+/* ======= FEATURES ======= */
+.feat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.feat {
+  padding: 20px;
+  border-radius: 14px;
+  background: var(--white);
+  box-shadow: var(--shadow);
+  text-align: center;
+  transition: transform .2s;
+}
+.feat:hover { transform: translateY(-4px); }
+.feat span  { font-size: 34px; }
+.feat h3    { color: var(--red); margin: 10px 0 5px; font-size: 15px; }
+.feat p     { margin: 0; font-size: 13px; color: var(--grey); }
+
+/* ======= ADMIN ======= */
+#adminSection {
+  display: none;
+  max-width: 1100px;
+  margin: 34px auto;
+  padding: 0 18px;
+}
+
+#adminSection h2 { color: var(--red); }
+
+.admin-login-box {
+  max-width: 380px;
+  padding: 20px;
+  border-radius: 12px;
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+.admin-login-box input {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--white);
+  color: var(--txt);
+}
+.admin-login-box button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 6px;
+  background: var(--red);
+  color: white;
+  font-weight: 700;
+}
+
+#adminErrMsg { font-size: 12px; color: var(--danger); margin-top: 6px; }
+
+#adminPanel { display: none; }
+
+.stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 18px 0;
+}
+
+.stat {
+  flex: 1;
+  min-width: 150px;
+  padding: 16px;
+  border-radius: 11px;
+  background: var(--red);
+  color: var(--gold);
+  text-align: center;
+}
+.stat h3 { margin: 0; font-size: 24px; }
+.stat p  { margin: 4px 0 0; font-size: 13px; }
+
+.tbl-wrap { overflow-x: auto; }
+
+table.admin-tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+table.admin-tbl th { padding: 10px; background: var(--red); color: var(--gold); text-align: left; white-space: nowrap; }
+table.admin-tbl td { padding: 9px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+table.admin-tbl tr:hover td { background: rgba(139,0,0,.04); }
+
+.del-btn {
+  padding: 4px 9px;
+  border: none;
+  border-radius: 4px;
+  background: red;
+  color: white;
+  font-size: 11px;
+}
+
+/* ======= BOOKING FORM ======= */
+.book-wrap {
+  max-width: 760px;
+  margin: 44px auto;
+  padding: 28px;
+  border-radius: 16px;
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+
+.book-wrap h2 { margin-top: 0; color: var(--red); text-align: center; }
+
+/* step indicators */
+.steps {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+  margin: 24px 0;
+}
+
+.step-node {
+  flex: 1;
+  text-align: center;
+  font-size: 11px;
+  color: #aaa;
+}
+
+.step-node .dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #ccc;
+  color: white;
+  font-weight: 700;
+  line-height: 32px;
+  margin: 0 auto 4px;
+}
+
+.step-node.on  { color: var(--red); font-weight: 700; }
+.step-node.on .dot { background: var(--red); }
+.step-node.done .dot { background: var(--ok); }
+
+/* each step panel */
+.panel { display: none; animation: fadeSlide .3s ease; }
+.panel.on { display: block; }
+
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateX(18px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+label {
+  display: block;
+  margin-top: 14px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.book-wrap input,
+.book-wrap select,
+.book-wrap textarea {
+  width: 100%;
+  padding: 11px;
+  margin-top: 5px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--white);
+  color: var(--txt);
+  outline: none;
+}
+
+.book-wrap input:focus,
+.book-wrap select:focus { border-color: var(--red); }
+
+/* ground picker cards */
+.ground-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.gcard {
+  border: 2px solid transparent;
+  border-radius: 9px;
+  background: var(--bg);
+  text-align: center;
+  cursor: pointer;
+  overflow: hidden;
+  transition: .18s;
+}
+.gcard:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+.gcard.picked { border-color: var(--red); background: #fff3f3; }
+.gcard img { width: 100%; height: 90px; object-fit: cover; }
+.gcard p { margin: 6px 0 2px; font-weight: 700; font-size: 12px; }
+.gcard small { display: block; margin-bottom: 5px; color: var(--ok); font-size: 11px; }
+
+/* slot buttons */
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.slot-btn {
+  padding: 10px 4px;
+  border: 1px solid #b9e4bd;
+  border-radius: 7px;
+  background: #f1fff2;
+  color: #187b18;
+  font-size: 11px;
+  font-weight: 700;
+}
+.slot-btn.taken { background: #fff0f0; border-color: #ffb4b4; color: #c00; cursor: not-allowed; }
+.slot-btn.blocked { background: #fffbef; border-color: #e6c75f; color: #7a5400; cursor: not-allowed; }
+.slot-btn.chosen { background: var(--red); border-color: var(--red); color: white; }
+
+.slot-hint {
+  margin-top: 9px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: #fff8e6;
+  color: #7a5400;
+  font-size: 12px;
+}
+
+.amount-row {
+  margin-top: 14px;
+  padding: 13px;
+  border: 1px dashed var(--gold);
+  border-radius: 8px;
+  background: #fffbef;
+  color: #6a4d00;
+  text-align: center;
+  font-size: 17px;
+}
+
+#captchaDisplay {
+  padding: 11px;
+  background: #1a1a1a;
+  border-radius: 7px;
+  color: var(--gold);
+  letter-spacing: 10px;
+  font-size: 19px;
+  font-weight: 900;
+  text-align: center;
+  user-select: none;
+  margin-top: 8px;
+}
+
+#qrArea { display: none; margin-top: 12px; text-align: center; }
+#qrImg  { width: 170px; border-radius: 8px; border: 1px solid var(--line); }
+
+.form-nav {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+.form-nav button { flex: 1; padding: 12px; border: none; border-radius: 7px; font-weight: 700; }
+
+#prevBtn { background: #ddd; color: #333; display: none; }
+#nextBtn { background: var(--red); color: var(--gold); }
+#submitBtn { background: var(--ok); color: white; display: none; }
+
+.err-msg {
+  display: none;
+  color: red;
+  font-size: 12px;
+  margin-top: 7px;
+}
+
+#bookingMsg { margin-top: 16px; text-align: center; font-weight: 700; }
+#bookingMsg.good { color: var(--ok); }
+#bookingMsg.fail { color: var(--danger); }
+
+/* ======= PUBLIC TIMETABLE ======= */
+.tt-wrap { overflow-x: auto; margin-top: 14px; border: 1px solid var(--line); border-radius: 10px; }
+
+.tt-table { width: 100%; min-width: 580px; border-collapse: collapse; font-size: 12px; }
+.tt-table th { background: var(--red); color: var(--gold); padding: 9px 10px; }
+.tt-table td { padding: 9px 10px; border: 1px solid var(--line); text-align: center; }
+.tt-table .av  { background: #eaffed; color: #167a24; font-weight: 700; }
+.tt-table .bk  { background: #ffe5e5; color: #b00; font-weight: 700; }
+.tt-table .mn  { background: #fff2bf; color: #7a5400; font-weight: 700; }
+
+/* ======= HISTORY ======= */
+#historySection {
+  display: none;
+  max-width: 1080px;
+  margin: 34px auto;
+  padding: 0 18px;
+}
+
+.h-card {
+  padding: 15px;
+  margin-top: 10px;
+  border-left: 5px solid var(--red);
+  border-radius: 9px;
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+.h-card h3 { margin: 0; color: var(--red); font-size: 15px; }
+.h-card p  { margin: 5px 0 0; font-size: 13px; color: var(--grey); }
+.cancel-btn {
+  margin-top: 8px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  background: #d00;
+  color: white;
+  font-size: 12px;
+}
+
+/* ======= REVIEWS ======= */
+.review-form {
+  max-width: 580px;
+  margin: 0 auto 20px;
+  padding: 20px;
+  border-radius: 13px;
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+.review-form input,
+.review-form select,
+.review-form textarea {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-top: 7px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--white);
+  color: var(--txt);
+}
+.review-form button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 7px;
+  background: var(--red);
+  color: white;
+  font-weight: 700;
+}
+
+.rv-card {
+  padding: 14px;
+  margin-top: 9px;
+  border-radius: 10px;
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+.rv-card strong { color: var(--red); }
+.rv-card .stars { color: #f5a400; }
+
+/* ======= PROFILE MODAL ======= */
+#profileModal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.58);
+  z-index: 9000;
+  place-items: center;
+  padding: 20px;
+}
+
+.pm-inner {
+  background: var(--white);
+  width: min(430px, 100%);
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+
+.pm-head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+
+.avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--red);
+  color: var(--gold);
+  display: grid;
+  place-items: center;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.pm-head h3 { margin: 0; color: var(--red); }
+.pm-head p  { margin: 3px 0 0; font-size: 13px; color: var(--grey); }
+
+.pm-inner hr { border: none; border-top: 1px solid var(--line); margin: 16px 0; }
+.pm-inner h4 { margin: 0 0 8px; color: var(--red); }
+
+.badge-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.badge {
+  padding: 5px 11px;
+  border-radius: 20px;
+  background: #fff3c4;
+  color: #7a5400;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ======= FOOTER ======= */
+footer {
+  padding: 22px 16px;
+  background: #1e0000;
+  color: #ccc;
+  text-align: center;
+  font-size: 12px;
+}
+
+/* responsive tweaks */
+@media (max-width: 720px) {
+  nav { flex-direction: column; align-items: flex-start; }
+  .nav-btns { width: 100%; justify-content: space-between; }
+  .hero { min-height: 440px; padding: 36px 6%; }
 }
 </style>
 </head>
 
 <body>
 
-<!-- TOAST CONTAINER -->
-<div id="toastContainer"></div>
+<div id="toasts"></div>
 
-<!-- ================= LOGIN PAGE ================= -->
-<div id="loginPage">
-  <div class="login-box">
-    <div class="login-logo">🏏</div>
-    <h2>Net Grounds Booking</h2>
-    <p class="login-subtitle">Book grounds, form teams, and compete</p>
+<!-- =============== LOGIN PAGE =============== -->
+<div id="loginWrap">
+  <div class="login-card">
 
-    <button class="social-btn google-btn" onclick="loginWithGoogle()"><span>G</span> Continue with Google</button>
-    <button class="social-btn facebook-btn" onclick="loginWithFacebook()"><span>f</span> Continue with Facebook</button>
+    <div class="login-icon">🏏</div>
+    <h2>Net Grounds</h2>
+    <small>Book slots, build teams, earn rewards</small>
 
-    <div class="divider"><span>OR</span></div>
-
-    <input id="phoneNumber" type="tel" maxlength="10" inputmode="numeric" placeholder="10 digit phone number" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)">
-    <button class="otp-btn" onclick="sendOTP()">Send OTP</button>
-
-    <div id="otpArea" style="display:none;">
-      <input id="otpCode" type="text" maxlength="6" inputmode="numeric" placeholder="Enter OTP" oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)">
-      <button class="otp-btn" onclick="verifyOTP()">Verify OTP</button>
+    <div class="social-row" style="margin-top:18px;">
+      <button class="btn-google" onclick="loginGoogle()">
+        <b>G</b> &nbsp;Continue with Google
+      </button>
+      <button class="btn-fb" onclick="loginFB()">
+        <b>f</b> &nbsp;Continue with Facebook
+      </button>
     </div>
 
-    <div id="demoOtp"></div>
-    <p id="loginError"></p>
+    <div class="or-divider"><span>OR</span></div>
 
-    <button class="demo-btn" onclick="demoLogin()">Continue as Demo User</button>
+    <input
+      id="phoneInput"
+      type="tel"
+      maxlength="10"
+      inputmode="numeric"
+      placeholder="Enter 10-digit mobile number"
+      oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)"
+    >
+    <button class="btn-otp" style="margin-top:10px; width:100%;" onclick="sendOTP()">
+      Send OTP
+    </button>
+
+    <div id="otpSection" style="display:none;">
+      <input
+        id="otpInput"
+        type="text"
+        maxlength="6"
+        inputmode="numeric"
+        placeholder="Enter the OTP"
+        style="margin-top:10px;"
+        oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)"
+      >
+      <button class="btn-otp" style="margin-top:8px; width:100%;" onclick="checkOTP()">
+        Verify
+      </button>
+    </div>
+
+    <div id="otpHint"></div>
+    <p id="loginErr"></p>
+
+    <button class="btn-demo" onclick="quickDemo()">Try Demo Account</button>
+
   </div>
 </div>
 
-<!-- ================= MAIN SITE ================= -->
-<div id="mainSite">
+<!-- =============== MAIN APP =============== -->
+<div id="app">
 
-  <nav class="topnav">
+  <nav>
     <span class="brand">🏏 Net Grounds Pro</span>
-    <div class="nav-actions">
-      <span id="userName">Guest</span>
-      <button id="themeBtn" onclick="toggleTheme()">🌙</button>
-      <button onclick="toggleProfileModal()">👤 Profile</button>
-      <button onclick="toggleHistory()">📜 History</button>
-      <button id="adminBtn" onclick="toggleAdmin()">⚙ Admin</button>
-      <button id="logoutBtn" onclick="doLogout()">Logout</button>
+    <div class="nav-btns">
+      <span id="navUser">Captain</span>
+      <button onclick="toggleDark()">🌙</button>
+      <button onclick="openProfile()">👤 Profile</button>
+      <button onclick="openHistory()">📜 History</button>
+      <button id="adminBtn" onclick="openAdmin()">⚙ Admin</button>
+      <button onclick="logout()">Logout</button>
     </div>
   </nav>
 
-  <!-- HERO -->
+  <!-- hero -->
   <section class="hero">
-    <div class="hero-content">
-      <h1>Play More.<br><span>Book Faster.</span></h1>
-      <p>Premium cricket, football, shuttle, kabaddi, hockey, and volleyball grounds with live slots, team creation, and rewards.</p>
-      <div class="hero-buttons">
-        <button class="primary-btn" onclick="scrollToBooking()">BOOK SLOT NOW</button>
-        <button class="secondary-btn" onclick="scrollToGrounds()">VIEW ON MAP</button>
+    <div class="hero-text">
+      <h1>Play More.<br><em>Book Faster.</em></h1>
+      <p>Cricket, football, shuttle, kabaddi, hockey & volleyball grounds with live slots, team tools, and daily rewards.</p>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="goToBooking()">Book a Slot →</button>
+        <button class="btn-outline" onclick="goToMap()">See Grounds on Map</button>
       </div>
-      <div class="hero-badges">
+      <div class="hero-tags">
         <span>✅ Instant Confirmation</span>
         <span>👥 Team Matchmaking</span>
         <span>🎟️ Referral Rewards</span>
@@ -393,600 +1058,712 @@ tr:hover td { background: rgba(139,0,0,.05); }
     </div>
   </section>
 
-  <!-- WEATHER & OFFERS STRIPS -->
-  <div class="strips-container">
-    <div class="strip-card">
+  <!-- deals & weather -->
+  <div class="strips">
+    <div class="strip deal">
       <div>
         <small>🔥 FLASH DEAL</small>
         <strong>Book 90+ mins & get 15% OFF</strong>
       </div>
-      <button onclick="scrollToBooking()">Claim</button>
+      <button onclick="goToBooking()">Claim</button>
     </div>
 
-    <div class="strip-card weather" id="weatherCard">
+    <div class="strip weather" id="weatherStrip">
       <div>
-        <small id="weatherCity">🌤️ WEATHER ALERT</small>
-        <strong id="weatherDesc">28°C • Perfect outdoor conditions!</strong>
+        <small id="wCity">🌤️ WEATHER</small>
+        <strong id="wText">28°C • Perfect outdoor conditions!</strong>
       </div>
-      <button onclick="checkWeather()">Refresh</button>
+      <button onclick="refreshWeather()">Refresh</button>
     </div>
   </div>
 
-  <!-- AI GROUND ASSISTANT -->
+  <!-- AI assistant -->
   <section class="section">
-    <div class="ai-widget">
-      <h3 style="margin-top:0; color:var(--gold);">🤖 AI Ground Assistant</h3>
-      <p style="margin:5px 0 10px; font-size:13px; color:#ddd;">Ask for ground recommendations (e.g., "Cricket ground tomorrow evening under 800")</p>
-      <div class="ai-chat-box" id="aiChatBox">
-        <div class="ai-msg bot">Hi! I am your AI Ground Assistant. How can I help you book today?</div>
+    <div class="ai-box">
+      <h3>🤖 AI Ground Assistant</h3>
+      <p>Ask for recommendations — "Cricket ground tomorrow evening under ₹800"</p>
+      <div class="chat-area" id="chatArea">
+        <div class="msg bot">Hi! I can help you find the right ground. What sport are you looking for?</div>
       </div>
-      <div class="ai-input-box">
-        <input id="aiQuery" placeholder="Type your request here..." onkeypress="if(event.key==='Enter')askAI()">
-        <button onclick="askAI()">Ask AI</button>
+      <div class="ai-row">
+        <input id="aiInput" placeholder="Type your question..." onkeydown="if(event.key==='Enter')aiAsk()">
+        <button onclick="aiAsk()">Ask</button>
       </div>
     </div>
   </section>
 
-  <!-- SPIN WHEEL -->
-  <section id="spinSection">
-    <h2 class="section-title">🎡 Daily Spin & Win</h2>
-    <p class="section-subtitle">Spin once per day to win discount coupons.</p>
-    <div id="wheelContainer">
-      <div id="spinArrow"></div>
+  <!-- spin wheel -->
+  <div id="spinWrap">
+    <h2 class="sec-title" style="margin-top:0;">🎡 Daily Spin & Win</h2>
+    <p class="sec-sub" style="margin-bottom:0;">One spin per day — win discount coupons!</p>
+    <div class="wheel-holder">
+      <div class="wheel-arrow"></div>
       <div id="wheel"></div>
     </div>
-    <button id="spinBtn" onclick="spinWheel()">SPIN NOW</button>
+    <button id="spinBtn" onclick="doSpin()">SPIN NOW</button>
     <p id="spinResult"></p>
-  </section>
+  </div>
 
-  <!-- LEADERBOARD -->
+  <!-- leaderboard -->
   <section class="section">
-    <h2 class="section-title">🏆 Top Players Leaderboard</h2>
-    <p class="section-subtitle">Most active captains and teams this month.</p>
-    <div class="leaderboard-card" style="overflow-x:auto;">
-      <table class="leaderboard-table">
+    <h2 class="sec-title">🏆 Top Players This Month</h2>
+    <p class="sec-sub">Most active captains on the platform.</p>
+    <div class="card" style="overflow-x:auto; padding:16px;">
+      <table class="lb-table">
         <thead>
           <tr>
             <th>Rank</th>
-            <th>Player Name</th>
+            <th>Player</th>
             <th>Bookings</th>
-            <th>Matches Won</th>
+            <th>Wins</th>
             <th>Badge</th>
           </tr>
         </thead>
-        <tbody id="leaderboardBody">
-          <!-- Populated by JS -->
-        </tbody>
+        <tbody id="lbBody"></tbody>
       </table>
     </div>
   </section>
 
-  <!-- TEAMS & FIND PLAYERS -->
+  <!-- teams -->
   <section class="section">
-    <h2 class="section-title">👥 Teams & Matchmates</h2>
-    <p class="section-subtitle">Create your team or find 2 more players for your upcoming match.</p>
-    
+    <h2 class="sec-title">👥 Teams & Matchmates</h2>
+    <p class="sec-sub">Create your squad or find players for your next match.</p>
     <div class="team-grid">
-      <div class="team-card team-form">
-        <h3 style="margin-top:0; color:var(--primary);">Create Your Team</h3>
-        <input id="teamNameInput" placeholder="Team Name (e.g. Blasters XI)">
-        <input id="teamSportInput" placeholder="Sport (e.g. Cricket)">
-        <button onclick="createTeam()">Save Team</button>
-        <p id="teamMsg" style="font-size:12px; margin-top:8px;"></p>
+
+      <div class="card">
+        <h3>Create a Team</h3>
+        <input id="tName" placeholder="Team name (e.g. Blasters XI)">
+        <input id="tSport" placeholder="Sport (e.g. Cricket)">
+        <button class="save-btn" onclick="saveTeam()">Save Team</button>
+        <p id="teamFeedback"></p>
       </div>
 
-      <div class="team-card">
-        <h3 style="margin-top:0; color:var(--primary);">My Saved Teams</h3>
-        <div id="myTeamsList" style="font-size:13px; max-height:150px; overflow-y:auto; margin-top:10px;"></div>
+      <div class="card">
+        <h3>My Teams</h3>
+        <div id="teamsList" style="margin-top:8px; font-size:13px; max-height:140px; overflow-y:auto;"></div>
       </div>
+
     </div>
   </section>
 
-  <!-- WALLET & REFERRALS -->
+  <!-- wallet & referral -->
   <section class="section">
-    <h2 class="section-title">💳 Digital Wallet & Referrals</h2>
-    <div class="wallet-box">
+    <h2 class="sec-title">💳 Wallet & Referrals</h2>
+
+    <div class="wallet-row">
       <div>
-        <p style="margin:0; color:var(--muted); font-size:13px;">Available Wallet Balance</p>
-        <div class="wallet-balance">₹<span id="walletBalance">250</span></div>
+        <small>Available Balance</small>
+        <div class="w-amount">₹<span id="walletAmt">250</span></div>
       </div>
-      <div>
-        <button class="location-btn" onclick="addWalletMoney()">+ Add ₹500</button>
-      </div>
+      <button class="btn-action" onclick="topUpWallet()">+ Add ₹500</button>
     </div>
 
-    <div class="wallet-box" style="margin-top:15px;">
+    <div class="wallet-row">
       <div>
-        <p style="margin:0; color:var(--muted); font-size:13px;">Refer Friends & Earn</p>
-        <strong>Share your link: <span id="referralLink" style="color:var(--primary);">netgrounds.app/ref/USER99</span></strong>
+        <small>Invite friends & earn ₹100 each</small>
+        <strong>Your link: <span id="refLink" style="color:var(--red);">netgrounds.app/ref/USER99</span></strong>
       </div>
-      <div>
-        <button class="location-btn" onclick="copyReferral()">Copy Link</button>
-      </div>
+      <button class="btn-action" onclick="copyRef()">Copy Link</button>
     </div>
   </section>
 
-  <!-- LOCATION & MAP -->
-  <section class="location-panel">
+  <!-- location bar -->
+  <div class="loc-bar">
     <div>
       <h3>📍 Find Grounds Near You</h3>
-      <p id="locationText">Allow location access to find nearby grounds.</p>
+      <p id="locText">Enable location to discover nearby grounds.</p>
     </div>
-    <button class="location-btn" onclick="getUserLocation()">Use My Location</button>
+    <button class="btn-action" onclick="getLocation()">Use My Location</button>
+  </div>
+
+  <!-- map -->
+  <section class="section" id="mapSection">
+    <h2 class="sec-title">Grounds on the Map</h2>
+    <p class="sec-sub">Click any pin to see ground details.</p>
+    <div id="mapDiv"></div>
   </section>
 
-  <section id="mapSection">
-    <h2 class="section-title">Popular Grounds on Map</h2>
-    <p class="section-subtitle">Click markers to see ground details.</p>
-    <div id="map"></div>
-  </section>
-
-  <!-- FEATURES -->
+  <!-- feature highlights -->
   <section class="section">
-    <h2 class="section-title">Why Players Choose Us</h2>
-    <p class="section-subtitle">Everything you need for a great match.</p>
-    <div class="feature-grid">
-      <div class="feature-card"><span>⚡</span><h3>Instant Booking</h3><p>Reserve slots in seconds.</p></div>
-      <div class="feature-card"><span>📍</span><h3>Nearby Grounds</h3><p>Discover close-by locations.</p></div>
-      <div class="feature-card"><span>🗓️</span><h3>Live Timetable</h3><p>Check available & blocked slots.</p></div>
-      <div class="feature-card"><span>💳</span><h3>Easy Payments</h3><p>Pay via UPI, GPay & Wallet.</p></div>
+    <h2 class="sec-title">Why Players Choose Us</h2>
+    <p class="sec-sub">Everything you need for a great game.</p>
+    <div class="feat-grid">
+      <div class="feat">
+        <span>⚡</span>
+        <h3>Instant Booking</h3>
+        <p>Reserve your slot in seconds.</p>
+      </div>
+      <div class="feat">
+        <span>📍</span>
+        <h3>Nearby Grounds</h3>
+        <p>Find the closest venues fast.</p>
+      </div>
+      <div class="feat">
+        <span>🗓️</span>
+        <h3>Live Timetable</h3>
+        <p>Real-time slot availability.</p>
+      </div>
+      <div class="feat">
+        <span>💳</span>
+        <h3>Easy Payments</h3>
+        <p>Pay via UPI, GPay or Wallet.</p>
+      </div>
     </div>
   </section>
 
-  <!-- ADMIN DASHBOARD -->
-  <section id="adminPage">
+  <!-- ADMIN SECTION -->
+  <section id="adminSection">
     <h2>⚙ Admin Dashboard</h2>
-    <div id="adminLoginBox" class="admin-login">
-      <h3>Admin Login</h3>
-      <input id="adminPassword" type="password" placeholder="Enter admin password">
-      <button onclick="adminLogin()">Unlock Admin Panel</button>
-      <p id="adminMessage" style="color:var(--red); font-size:12px; margin-top:8px;"></p>
+
+    <div id="adminLoginBox" class="admin-login-box">
+      <h3 style="margin-top:0;">Admin Login</h3>
+      <input id="adminPass" type="password" placeholder="Enter admin password">
+      <button onclick="unlockAdmin()">Unlock Panel</button>
+      <p id="adminErrMsg"></p>
     </div>
 
-    <div id="adminTools" class="admin-tools">
-      <div class="stats">
-        <div class="stat-box"><h3 id="totalBookings">0</h3><p>Total Bookings</p></div>
-        <div class="stat-box"><h3 id="totalRevenue">₹0</h3><p>Total Revenue</p></div>
-        <div class="stat-box"><h3 id="totalReviews">0</h3><p>Total Reviews</p></div>
+    <div id="adminPanel">
+      <div class="stats-row">
+        <div class="stat"><h3 id="sTotalBook">0</h3><p>Total Bookings</p></div>
+        <div class="stat"><h3 id="sRevenue">₹0</h3><p>Revenue</p></div>
+        <div class="stat"><h3 id="sReviews">0</h3><p>Reviews</p></div>
       </div>
 
-      <div class="admin-card">
-        <h3>Block Maintenance Time</h3>
-        <input id="maintenanceDate" type="date">
-        <select id="maintenanceGround">
+      <!-- maintenance block tool -->
+      <div class="card" style="margin-bottom:18px;">
+        <h3 style="margin-top:0;">Block Maintenance Slot</h3>
+        <input id="mDate" type="date" style="width:100%; padding:9px; margin-top:8px; border:1px solid var(--line); border-radius:6px; background:var(--white); color:var(--txt);">
+        <select id="mGround" style="width:100%; padding:9px; margin-top:8px; border:1px solid var(--line); border-radius:6px; background:var(--white); color:var(--txt);">
           <option value="">Select Ground</option>
           <option>Pitch A</option><option>Pitch B</option><option>Pitch C</option>
-          <option>Ground 1</option><option>Ground 2</option><option>Court 1</option><option>Court 2</option>
+          <option>Ground 1</option><option>Ground 2</option>
+          <option>Court 1</option><option>Court 2</option>
         </select>
-        <select id="maintenanceSlot"><option value="">Select Time Slot</option></select>
-        <button class="block-btn" onclick="blockMaintenanceSlot()">Block Slot</button>
+        <select id="mSlot" style="width:100%; padding:9px; margin-top:8px; border:1px solid var(--line); border-radius:6px; background:var(--white); color:var(--txt);">
+          <option value="">Select Slot</option>
+        </select>
+        <button
+          style="margin-top:10px; padding:9px 16px; border:none; border-radius:6px; background:#7a5400; color:white; font-weight:700;"
+          onclick="blockSlot()"
+        >Block Slot</button>
       </div>
 
-      <div class="admin-card" style="overflow-x:auto;">
-        <h3>All Booking Orders</h3>
-        <table>
+      <div class="tbl-wrap card">
+        <h3 style="margin-top:0;">All Bookings</h3>
+        <table class="admin-tbl">
           <thead>
             <tr>
-              <th>#</th><th>Name</th><th>Phone</th><th>Date</th><th>Game</th><th>Ground</th><th>Time</th><th>Amount</th><th>Payment</th><th>Action</th>
+              <th>#</th><th>Name</th><th>Phone</th><th>Date</th>
+              <th>Game</th><th>Ground</th><th>Time</th>
+              <th>Amount</th><th>Payment</th><th>Action</th>
             </tr>
           </thead>
-          <tbody id="adminTable"></tbody>
+          <tbody id="adminTbl"></tbody>
         </table>
-        <p id="noBookings" style="text-align:center; color:#888;">No bookings yet.</p>
+        <p id="noDataMsg" style="text-align:center; color:#999; padding:10px;">No bookings yet.</p>
       </div>
     </div>
   </section>
 
-  <!-- BOOKING SECTION -->
-  <section class="booking" id="booking">
+  <!-- BOOKING FORM -->
+  <section class="book-wrap" id="bookingForm">
     <h2>Book Your Ground</h2>
+
+    <!-- progress dots -->
     <div class="steps">
-      <div class="step-dot active" id="dot1"><div class="circle">1</div>Details</div>
-      <div class="step-dot" id="dot2"><div class="circle">2</div>Game</div>
-      <div class="step-dot" id="dot3"><div class="circle">3</div>Time</div>
-      <div class="step-dot" id="dot4"><div class="circle">4</div>Payment</div>
+      <div class="step-node on" id="node1"><div class="dot">1</div>Details</div>
+      <div class="step-node"    id="node2"><div class="dot">2</div>Ground</div>
+      <div class="step-node"    id="node3"><div class="dot">3</div>Time</div>
+      <div class="step-node"    id="node4"><div class="dot">4</div>Payment</div>
     </div>
 
-    <!-- STEP 1 -->
-    <div class="step-slide active" id="step1">
-      <label>Captain Name</label>
-      <input id="name" placeholder="Enter your full name">
+    <!-- step 1 -->
+    <div class="panel on" id="p1">
+      <label>Full Name</label>
+      <input id="fname" placeholder="Enter your name">
+
       <label>Phone Number</label>
-      <input id="contact" maxlength="10" inputmode="numeric" placeholder="10 digit mobile number" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)">
+      <input
+        id="fphone"
+        maxlength="10"
+        inputmode="numeric"
+        placeholder="10-digit mobile"
+        oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)"
+      >
+
       <label>Age</label>
-      <input id="age" type="number" min="5" max="100" placeholder="Your age">
+      <input id="fage" type="number" min="5" max="100" placeholder="Your age">
+
       <label>Gender</label>
-      <select id="gender">
+      <select id="fgender">
         <option value="">-- Select --</option>
-        <option value="MALE">Male</option>
-        <option value="FEMALE">Female</option>
-        <option value="OTHER">Other</option>
+        <option>Male</option>
+        <option>Female</option>
+        <option>Other</option>
       </select>
-      <p class="error" id="err1">⚠️ Enter valid details. Phone must be 10 digits.</p>
+
+      <p class="err-msg" id="e1">⚠️ Fill in all details. Phone must be 10 digits.</p>
     </div>
 
-    <!-- STEP 2 -->
-    <div class="step-slide" id="step2">
-      <label>Select Game</label>
-      <select id="game" onchange="loadGrounds()">
-        <option value="">-- Select Game --</option>
+    <!-- step 2 -->
+    <div class="panel" id="p2">
+      <label>Select Sport</label>
+      <select id="sportPick" onchange="showGrounds()">
+        <option value="">-- Select Sport --</option>
         <option value="cricket">Cricket</option>
-        <option value="shuttle">Shuttle</option>
+        <option value="shuttle">Badminton / Shuttle</option>
         <option value="football">Football</option>
         <option value="kabaddi">Kabaddi</option>
         <option value="hockey">Hockey</option>
         <option value="volleyball">Volleyball</option>
       </select>
 
-      <label>Select Ground</label>
-      <div class="pitch-box" id="grounds"></div>
-      <input type="hidden" id="pitch">
-      <p class="error" id="err2">⚠️ Please select a game and ground.</p>
+      <label>Pick a Ground</label>
+      <div class="ground-grid" id="groundGrid"></div>
+      <input type="hidden" id="chosenGround">
+
+      <p class="err-msg" id="e2">⚠️ Select a sport and a ground to continue.</p>
     </div>
 
-    <!-- STEP 3 -->
-    <div class="step-slide" id="step3">
-      <label>Select Date</label>
-      <input id="bookingDate" type="date">
-      <label>Available Time Slots</label>
-      <div id="slotMessage" class="slot-message">Select date, game, and ground to view available slots.</div>
-      <div id="timeSlots" class="time-slots"></div>
-      <input id="selectedSlot" type="hidden">
-      <label>Start Time</label>
-      <input id="startTime" type="time" readonly>
-      <label>End Time</label>
-      <input id="endTime" type="time" readonly>
-      <div class="amount-box">
-        Amount to Pay: <strong>₹<span id="amount">0</span></strong>
-        <p style="font-size:11px; color:#888; margin:4px 0 0;">₹10 per minute</p>
+    <!-- step 3 -->
+    <div class="panel" id="p3">
+      <label>Date</label>
+      <input id="bDate" type="date">
+
+      <label>Available Slots</label>
+      <p class="slot-hint" id="slotHint">Choose a date and ground first.</p>
+      <div class="slot-grid" id="slotGrid"></div>
+      <input type="hidden" id="pickedSlot">
+
+      <label>Start</label>
+      <input id="bStart" type="time" readonly>
+      <label>End</label>
+      <input id="bEnd" type="time" readonly>
+
+      <div class="amount-row">
+        Total: <strong>₹<span id="calcAmount">0</span></strong>
+        <br><small style="font-size:11px; color:#999;">₹10 per minute</small>
       </div>
-      <p class="error" id="err3">⚠️ Select date and an available time slot.</p>
+
+      <p class="err-msg" id="e3">⚠️ Pick a date and an available slot.</p>
     </div>
 
-    <!-- STEP 4 -->
-    <div class="step-slide" id="step4">
-      <label>Human Verification</label>
-      <div id="captchaBox"></div>
-      <input id="captchaInput" placeholder="Enter the text above">
+    <!-- step 4 -->
+    <div class="panel" id="p4">
+      <label>Captcha Check</label>
+      <div id="captchaDisplay"></div>
+      <input id="captchaAnswer" placeholder="Type the text above" style="margin-top:8px;">
 
       <label>Active Coupons</label>
-      <p id="activeCouponsList" style="font-size:12px; color:var(--green); font-weight:bold;"></p>
-      <label>Coupon Code (Optional)</label>
-      <input id="couponCode" placeholder="Try WEEKEND10">
-      <button type="button" class="location-btn" style="margin-top:8px; width:100%;" onclick="applyCoupon()">Apply Coupon</button>
-      <p id="couponMessage" style="font-size:12px;"></p>
+      <p id="couponDisplay" style="font-size:12px; color:var(--ok); font-weight:700; margin:4px 0;"></p>
 
-      <label>Final Paid Amount</label>
-      <input id="paidAmount" readonly>
+      <label>Coupon Code</label>
+      <input id="couponInput" placeholder="e.g. WEEKEND10">
+      <button
+        type="button"
+        style="margin-top:8px; width:100%; padding:10px; border:none; border-radius:7px; background:var(--red); color:white; font-weight:700;"
+        onclick="useCoupon()"
+      >Apply Coupon</button>
+      <p id="couponFeedback" style="font-size:12px; margin-top:5px;"></p>
+
+      <label>Final Amount</label>
+      <input id="finalAmt" readonly>
 
       <label>Payment Method</label>
-      <select id="paymentMethod" onchange="showQR()">
-        <option value="">-- Select Payment --</option>
-        <option value="Wallet">Digital Wallet (Balance: ₹<span id="walletPaySpan">250</span>)</option>
+      <select id="payMethod" onchange="maybeShowQR()">
+        <option value="">-- Choose --</option>
+        <option value="Wallet">Digital Wallet (Balance: ₹<span id="walletPayDisplay">250</span>)</option>
         <option value="PhonePe">PhonePe</option>
         <option value="Google Pay">Google Pay</option>
       </select>
 
-      <div id="qrBox">
-        <img id="qrImage" alt="Payment QR Code">
-        <p><b>📱 Scan and Pay</b></p>
+      <div id="qrArea">
+        <img id="qrImg" alt="QR Code">
+        <p><b>📱 Scan to Pay</b></p>
       </div>
 
-      <p class="error" id="err4">⚠️ Complete verification and payment details.</p>
+      <p class="err-msg" id="e4">⚠️ Solve the captcha and choose a payment method.</p>
     </div>
 
-    <div class="nav-btns">
-      <button id="prevBtn" onclick="prevStep()" style="display:none;">← Previous</button>
-      <button id="nextBtn" onclick="nextStep()">Next →</button>
-      <button id="bookBtn" onclick="bookGround()" style="display:none;">✅ Pay & Book</button>
+    <div class="form-nav">
+      <button id="prevBtn" onclick="goBack()">← Back</button>
+      <button id="nextBtn" onclick="goNext()">Next →</button>
+      <button id="submitBtn" onclick="confirmBooking()">✅ Confirm & Pay</button>
     </div>
-    <p id="msg"></p>
+
+    <p id="bookingMsg"></p>
   </section>
 
   <!-- TIMETABLE -->
   <section class="section">
-    <h2 class="section-title">Daily Ground Timetable</h2>
-    <p class="section-subtitle">Green = Available, Red = Booked, Yellow = Maintenance.</p>
-    <div class="timetable-box">
-      <table class="timetable">
+    <h2 class="sec-title">Ground Timetable</h2>
+    <p class="sec-sub">Green = free, Red = booked, Yellow = maintenance</p>
+    <div class="tt-wrap">
+      <table class="tt-table">
         <thead>
-          <tr><th>Time</th><th>Pitch A</th><th>Pitch B</th><th>Ground 1</th><th>Court 1</th></tr>
+          <tr>
+            <th>Time</th>
+            <th>Pitch A</th>
+            <th>Pitch B</th>
+            <th>Ground 1</th>
+            <th>Court 1</th>
+          </tr>
         </thead>
-        <tbody id="publicTimetable"></tbody>
+        <tbody id="ttBody"></tbody>
       </table>
     </div>
   </section>
 
-  <!-- BOOKING HISTORY -->
-  <section id="historyBox" class="history-box">
-    <h2 class="section-title">My Booking History</h2>
-    <div id="historyList"></div>
+  <!-- HISTORY -->
+  <section id="historySection">
+    <div class="section">
+      <h2 class="sec-title">My Booking History</h2>
+      <div id="historyItems"></div>
+    </div>
   </section>
 
   <!-- REVIEWS -->
   <section class="section">
-    <h2 class="section-title">Customer Reviews</h2>
+    <h2 class="sec-title">Player Reviews</h2>
+
     <div class="review-form">
-      <input id="reviewName" placeholder="Your name">
-      <select id="reviewRating">
-        <option value="">Select rating</option>
-        <option value="5">★★★★★ - Excellent</option>
-        <option value="4">★★★★ - Very good</option>
-        <option value="3">★★★ - Good</option>
-        <option value="2">★★ - Average</option>
-        <option value="1">★ - Poor</option>
+      <input id="rvName" placeholder="Your name">
+      <select id="rvRating">
+        <option value="">Star rating</option>
+        <option value="5">★★★★★ Excellent</option>
+        <option value="4">★★★★ Very Good</option>
+        <option value="3">★★★ Good</option>
+        <option value="2">★★ Average</option>
+        <option value="1">★ Poor</option>
       </select>
-      <textarea id="reviewText" rows="3" placeholder="Write your review"></textarea>
-      <button onclick="submitReview()">Submit Review</button>
+      <textarea id="rvText" rows="3" placeholder="What did you think?"></textarea>
+      <button onclick="postReview()">Post Review</button>
     </div>
-    <div id="reviewList" class="review-list"></div>
+
+    <div id="reviewItems" style="max-width:860px; margin:0 auto;"></div>
   </section>
 
-  <footer class="footer">
-    © 2026 Net Grounds Pro | Play. Compete. Enjoy.
-  </footer>
+  <footer>© 2025 Net Grounds Pro &nbsp;|&nbsp; Play. Compete. Enjoy.</footer>
 </div>
 
 <!-- PROFILE MODAL -->
-<div id="profileModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999; place-items:center; padding:20px;">
-  <div style="background:var(--card); width:min(450px, 100%); padding:25px; border-radius:18px; box-shadow:var(--shadow);">
-    <div class="profile-flex">
-      <div class="avatar-circle" id="profileAvatar">U</div>
+<div id="profileModal">
+  <div class="pm-inner">
+    <div class="pm-head">
+      <div class="avatar" id="pmAvatar">C</div>
       <div>
-        <h3 id="profileName" style="margin:0; color:var(--primary);">User</h3>
-        <p id="profilePhone" style="margin:4px 0 0; color:var(--muted); font-size:13px;">--</p>
+        <h3 id="pmName">Captain</h3>
+        <p id="pmPhone">--</p>
       </div>
     </div>
-    <hr style="border:0; border-top:1px solid var(--border); margin:18px 0;">
-    <h4 style="margin:0 0 8px; color:var(--primary);">🏅 Achievements</h4>
-    <div class="badge-list" id="badgeList">
+    <hr>
+    <h4>🏅 Achievements</h4>
+    <div class="badge-row" id="pmBadges">
       <span class="badge">🥉 First Match</span>
     </div>
-    <button class="location-btn" style="margin-top:20px; width:100%;" onclick="toggleProfileModal()">Close Profile</button>
+    <button
+      style="margin-top:18px; width:100%; padding:10px; border:none; border-radius:8px; background:var(--red); color:white; font-weight:700;"
+      onclick="closeProfile()"
+    >Close</button>
   </div>
 </div>
 
-<!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-/* =====================================================
-   CONSTANTS & APP STATE
-===================================================== */
-const ADMIN_PASSWORD = "Admin@12345";
-const RATE_PER_MINUTE = 10;
+// ===================================================
+// config / constants
+// ===================================================
 
-let currentUser = null;
-let currentStep = 1;
-let adminUnlocked = false;
-let adminOpen = false;
-let generatedOTP = "";
-let captchaValue = "";
-let appliedDiscount = 0;
-let userCoupons = [];
-let isFirstLogin = true;
-let walletBalance = 250;
+const ADMIN_PW     = "Admin@12345";
+const RATE_PER_MIN = 10;
 
-const TIME_SLOTS = [
-  ["06:00", "07:00"], ["07:00", "08:00"], ["08:00", "09:00"],
-  ["09:00", "10:00"], ["10:00", "11:00"], ["16:00", "17:00"],
-  ["17:00", "18:00"], ["18:00", "19:00"], ["19:00", "20:00"],
-  ["20:00", "21:00"], ["21:00", "22:00"]
+// all time slots we offer
+const SLOTS = [
+  ["06:00","07:00"],["07:00","08:00"],["08:00","09:00"],
+  ["09:00","10:00"],["10:00","11:00"],["16:00","17:00"],
+  ["17:00","18:00"],["18:00","19:00"],["19:00","20:00"],
+  ["20:00","21:00"],["21:00","22:00"]
 ];
 
-const GAME_GROUNDS = {
-  cricket: [
-    { name: "Pitch A", img: "https://images.unsplash.com/photo-1531415074968-036ba1b575da" },
-    { name: "Pitch B", img: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e" },
-    { name: "Pitch C", img: "https://images.unsplash.com/photo-1531415074968-036ba1b575da" }
+const GROUNDS = {
+  cricket:    [
+    { name:"Pitch A",  img:"https://images.unsplash.com/photo-1531415074968-036ba1b575da" },
+    { name:"Pitch B",  img:"https://images.unsplash.com/photo-1540747913346-19e32dc3e97e" },
+    { name:"Pitch C",  img:"https://images.unsplash.com/photo-1531415074968-036ba1b575da" }
   ],
-  shuttle: [
-    { name: "Court 1", img: "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea" },
-    { name: "Court 2", img: "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea" }
+  shuttle:    [
+    { name:"Court 1",  img:"https://images.unsplash.com/photo-1626224583764-f87db24ac4ea" },
+    { name:"Court 2",  img:"https://images.unsplash.com/photo-1626224583764-f87db24ac4ea" }
   ],
-  football: [
-    { name: "Ground 1", img: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55" },
-    { name: "Ground 2", img: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55" }
+  football:   [
+    { name:"Ground 1", img:"https://images.unsplash.com/photo-1579952363873-27f3bade9f55" },
+    { name:"Ground 2", img:"https://images.unsplash.com/photo-1579952363873-27f3bade9f55" }
   ],
-  kabaddi: [
-    { name: "Kabaddi Court 1", img: "https://images.unsplash.com/photo-1546519638-68e109498ffc" }
-  ],
-  hockey: [
-    { name: "Hockey Ground 1", img: "https://images.unsplash.com/photo-1517466787929-bc90951d0974" }
-  ],
-  volleyball: [
-    { name: "Volley Court 1", img: "https://images.unsplash.com/photo-1612872087720-bb876e2e67d1" }
-  ]
+  kabaddi:    [{ name:"Kabaddi Court 1",  img:"https://images.unsplash.com/photo-1546519638-68e109498ffc" }],
+  hockey:     [{ name:"Hockey Ground 1", img:"https://images.unsplash.com/photo-1517466787929-bc90951d0974" }],
+  volleyball: [{ name:"Volley Court 1",  img:"https://images.unsplash.com/photo-1612872087720-bb876e2e67d1" }]
 };
 
-/* =====================================================
-   TOAST NOTIFICATIONS
-===================================================== */
-function showToast(message, type = "info") {
-  const container = document.getElementById("toastContainer");
-  const toast = document.createElement("div");
-  toast.className = `toast ${type}`;
-  toast.innerHTML = `<span>${message}</span>`;
-  container.appendChild(toast);
+// ===================================================
+// app state
+// ===================================================
+
+let user          = null;
+let step          = 1;
+let adminOpen     = false;
+let adminUnlocked = false;
+let otp           = "";
+let captchaCode   = "";
+let discount      = 0;
+let coupons       = [];
+let wallet        = 250;
+let mapLoaded     = false;
+let firstLogin    = true;
+
+// ===================================================
+// tiny helpers
+// ===================================================
+
+// XSS protection - always escape user content before putting it in HTML
+function esc(s) {
+  return String(s)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+function toast(msg, type = "note") {
+  const box = document.getElementById("toasts");
+  const t   = document.createElement("div");
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  box.appendChild(t);
   setTimeout(() => {
-    toast.style.opacity = "0";
-    setTimeout(() => toast.remove(), 300);
-  }, 3500);
+    t.style.opacity = "0";
+    t.style.transition = "opacity .25s";
+    setTimeout(() => t.remove(), 280);
+  }, 3200);
 }
 
-/* =====================================================
-   SCROLL NAVIGATION HELPERS
-===================================================== */
-function scrollToBooking() {
-  const bookingSec = document.getElementById("booking");
-  if (bookingSec) {
-    bookingSec.scrollIntoView({ behavior: "smooth" });
-  }
+function getBookings()    { return JSON.parse(localStorage.getItem("bookings")    || "[]"); }
+function getMaintenance() { return JSON.parse(localStorage.getItem("maintenance") || "[]"); }
+function saveBookings(b)  { localStorage.setItem("bookings", JSON.stringify(b)); }
+
+// ===================================================
+// AUTH
+// ===================================================
+
+function quickDemo() {
+  user = { name: "Demo Captain", phone: "9876543210" };
+  checkFirstLogin();
+  bootApp();
+  toast("Logged in as Demo Captain!", "ok");
 }
 
-function scrollToGrounds() {
-  const mapSec = document.getElementById("mapSection");
-  if (mapSec) {
-    mapSec.scrollIntoView({ behavior: "smooth" });
-  }
-}
-
-/* =====================================================
-   LOGIN & AUTH
-===================================================== */
-function demoLogin() {
-  currentUser = { displayName: "Demo Captain", phoneNumber: "9876543210" };
-  handleFirstLogin();
-  showMainSite();
-  showToast("Logged in as Demo Captain!", "success");
-}
-
-function loginWithGoogle() { showToast("Google Auth requires backend configuration.", "info"); }
-function loginWithFacebook() { showToast("Facebook Auth requires backend configuration.", "info"); }
+function loginGoogle()  { toast("Google sign-in needs a backend setup.", "note"); }
+function loginFB()      { toast("Facebook sign-in needs a backend setup.", "note"); }
 
 function sendOTP() {
-  const phone = document.getElementById("phoneNumber").value.trim();
-  if (!/^\d{10}$/.test(phone)) {
-    showLoginMessage("Phone number must contain exactly 10 digits.");
+  const ph = document.getElementById("phoneInput").value.trim();
+  if (!/^\d{10}$/.test(ph)) {
+    setLoginErr("Enter a valid 10-digit number.");
     return;
   }
-  generatedOTP = String(Math.floor(100000 + Math.random() * 900000));
-  document.getElementById("otpArea").style.display = "block";
-  const demoOtp = document.getElementById("demoOtp");
-  demoOtp.style.display = "block";
-  demoOtp.innerText = `Demo OTP: ${generatedOTP}`;
-  showLoginMessage("OTP sent successfully!");
+  otp = String(Math.floor(100000 + Math.random() * 900000));
+  document.getElementById("otpSection").style.display = "block";
+  const hint = document.getElementById("otpHint");
+  hint.style.display = "block";
+  hint.textContent   = `Demo OTP: ${otp}`;
+  setLoginErr("OTP sent!");
 }
 
-function verifyOTP() {
-  const entered = document.getElementById("otpCode").value.trim();
-  if (entered !== generatedOTP) {
-    showLoginMessage("Incorrect OTP.");
+function checkOTP() {
+  const entered = document.getElementById("otpInput").value.trim();
+  if (entered !== otp) {
+    setLoginErr("Wrong OTP, try again.");
     return;
   }
-  currentUser = { displayName: "Phone User", phoneNumber: document.getElementById("phoneNumber").value };
-  handleFirstLogin();
-  showMainSite();
-  showToast("Successfully verified!", "success");
+  user = { name: "Phone User", phone: document.getElementById("phoneInput").value };
+  checkFirstLogin();
+  bootApp();
+  toast("Verified successfully!", "ok");
 }
 
-function handleFirstLogin() {
-  const lastLogin = localStorage.getItem("lastLoginDate");
+function setLoginErr(msg) {
+  document.getElementById("loginErr").textContent = msg;
+}
+
+function checkFirstLogin() {
+  const last  = localStorage.getItem("lastSeen");
   const today = new Date().toDateString();
-  isFirstLogin = (lastLogin !== today);
-  if (isFirstLogin) localStorage.setItem("lastLoginDate", today);
+  firstLogin  = last !== today;
+  if (firstLogin) localStorage.setItem("lastSeen", today);
 }
 
-function showLoginMessage(msg) { document.getElementById("loginError").innerText = msg; }
+function bootApp() {
+  document.getElementById("loginWrap").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  document.getElementById("navUser").textContent = user?.name || "Captain";
 
-function showMainSite() {
-  document.getElementById("loginPage").style.display = "none";
-  document.getElementById("mainSite").style.display = "block";
-  document.getElementById("userName").innerText = currentUser?.displayName || "Captain";
-  userCoupons = JSON.parse(localStorage.getItem("userCoupons") || "[]");
-  walletBalance = Number(localStorage.getItem("walletBalance") || 250);
-  document.getElementById("walletBalance").innerText = walletBalance;
-  document.getElementById("walletPaySpan").innerText = walletBalance;
+  // load persisted data
+  coupons = JSON.parse(localStorage.getItem("userCoupons") || "[]");
+  wallet  = Number(localStorage.getItem("walletBal") || 250);
+  syncWalletDisplay();
 
-  renderReviews();
-  renderPublicTimetable();
-  renderLeaderboard();
-  renderMyTeams();
-  initMap();
+  buildLeaderboard();
+  buildTeamList();
+  buildTimetable();
+  buildReviews();
+  loadMap();
 }
 
-function doLogout() {
-  currentUser = null;
+function logout() {
+  user          = null;
   adminUnlocked = false;
-  adminOpen = false;
-  document.getElementById("adminPage").style.display = "none";
-  document.getElementById("adminTools").style.display = "none";
+  adminOpen     = false;
+  step          = 1;
+  document.getElementById("app").style.display        = "none";
+  document.getElementById("loginWrap").style.display  = "flex";
+  document.getElementById("adminSection").style.display = "none";
+  document.getElementById("adminPanel").style.display   = "none";
   document.getElementById("adminLoginBox").style.display = "block";
-  document.getElementById("loginPage").style.display = "flex";
-  document.getElementById("mainSite").style.display = "none";
-  showToast("Logged out successfully.", "info");
+  toast("Signed out.", "note");
 }
 
-/* =====================================================
-   THEME & PROFILE MODAL
-===================================================== */
-function toggleTheme() {
+// ===================================================
+// THEME
+// ===================================================
+
+function toggleDark() {
   document.body.classList.toggle("dark");
-  const enabled = document.body.classList.contains("dark");
-  localStorage.setItem("darkMode", enabled ? "1" : "0");
-  document.getElementById("themeBtn").innerText = enabled ? "☀️" : "🌙";
+  const on = document.body.classList.contains("dark");
+  localStorage.setItem("dark", on ? "1" : "0");
+  // update icon
+  document.querySelector("nav .nav-btns button").textContent = on ? "☀️" : "🌙";
 }
-if (localStorage.getItem("darkMode") === "1") {
+
+if (localStorage.getItem("dark") === "1") {
   document.body.classList.add("dark");
-  document.getElementById("themeBtn").innerText = "☀️";
 }
 
-function toggleProfileModal() {
-  const modal = document.getElementById("profileModal");
-  const isVisible = modal.style.display === "grid";
-  modal.style.display = isVisible ? "none" : "grid";
-  if (!isVisible) {
-    document.getElementById("profileName").innerText = currentUser?.displayName || "Captain";
-    document.getElementById("profilePhone").innerText = currentUser?.phoneNumber || "9876543210";
-    document.getElementById("profileAvatar").innerText = (currentUser?.displayName || "C")[0].toUpperCase();
-    renderAchievements();
+// ===================================================
+// PROFILE
+// ===================================================
+
+function openProfile() {
+  const m = document.getElementById("profileModal");
+  m.style.display = "grid";
+  document.getElementById("pmName").textContent  = user?.name  || "Captain";
+  document.getElementById("pmPhone").textContent = user?.phone || "9876543210";
+  document.getElementById("pmAvatar").textContent = (user?.name || "C")[0].toUpperCase();
+  buildBadges();
+}
+
+function closeProfile() {
+  document.getElementById("profileModal").style.display = "none";
+}
+
+function buildBadges() {
+  const bookings = getBookings();
+  const row = document.getElementById("pmBadges");
+  let html = `<span class="badge">🥉 First Match</span>`;
+  if (bookings.length >= 3) html += `<span class="badge">🥈 3+ Bookings</span>`;
+  if (bookings.length >= 5) html += `<span class="badge">🥇 Pro Captain</span>`;
+  const d = new Date().getDay();
+  if (d === 0 || d === 6) html += `<span class="badge">🔥 Weekend Warrior</span>`;
+  row.innerHTML = html;
+}
+
+// ===================================================
+// AI ASSISTANT
+// ===================================================
+
+function aiAsk() {
+  const q    = document.getElementById("aiInput").value.trim().toLowerCase();
+  const box  = document.getElementById("chatArea");
+  if (!q) return;
+
+  box.innerHTML += `<div class="msg user">${esc(q)}</div>`;
+  document.getElementById("aiInput").value = "";
+
+  // simple pattern matching - could hook to a real API later
+  let reply = "I found Pitch A (cricket) and Ground 1 (football) free for your timing!";
+  if (q.includes("cricket") || q.includes("pitch")) {
+    reply = "🏏 Pitch A & B are available with floodlights. Great turf condition today!";
+  } else if (q.includes("football") || q.includes("turf")) {
+    reply = "⚽ Ground 1 is free this evening. FIFA-standard grass and lights included.";
+  } else if (q.includes("cheap") || q.includes("budget") || q.includes("under")) {
+    reply = "💰 All grounds are ₹10/min. Use code WEEKEND10 for extra 10% off!";
+  } else if (q.includes("shuttle") || q.includes("badminton")) {
+    reply = "🏸 Court 1 & 2 are both open today. Indoor courts, good AC.";
   }
-}
-
-function renderAchievements() {
-  const bookings = JSON.parse(localStorage.getItem("bookings") || "[]");
-  const list = document.getElementById("badgeList");
-  list.innerHTML = `<span class="badge">🥉 First Match</span>`;
-  if (bookings.length >= 3) list.innerHTML += `<span class="badge">🥈 3+ Bookings</span>`;
-  if (bookings.length >= 5) list.innerHTML += `<span class="badge">🥇 Pro Captain</span>`;
-  if (new Date().getDay() === 0 || new Date().getDay() === 6) {
-    list.innerHTML += `<span class="badge">🔥 Weekend Warrior</span>`;
-  }
-}
-
-/* =====================================================
-   AI GROUND ASSISTANT
-===================================================== */
-function askAI() {
-  const query = document.getElementById("aiQuery").value.trim().toLowerCase();
-  const chatBox = document.getElementById("aiChatBox");
-  if (!query) return;
-
-  chatBox.innerHTML += `<div class="ai-msg user">${escapeHTML(query)}</div>`;
-  document.getElementById("aiQuery").value = "";
 
   setTimeout(() => {
-    let reply = "I found Pitch A (Cricket) and Ground 1 (Football) available for your timing under your budget!";
-    if (query.includes("cricket") || query.includes("pitch")) {
-      reply = "🏏 Recommendation: Pitch A or Pitch B are available with excellent turf and floodlights. Click 'Book Slot Now' to reserve!";
-    } else if (query.includes("football") || query.includes("turf")) {
-      reply = "⚽ Recommendation: Ground 1 is fully available this evening. Great bounce and FIFA-standard grass.";
-    } else if (query.includes("cheap") || query.includes("budget")) {
-      reply = "💰 All grounds are charged at ₹10/min. Use coupon WEEKEND10 for extra savings!";
-    }
-    chatBox.innerHTML += `<div class="ai-msg bot">${reply}</div>`;
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }, 600);
+    box.innerHTML += `<div class="msg bot">${reply}</div>`;
+    box.scrollTop = box.scrollHeight;
+  }, 500);
 }
 
-/* =====================================================
-   LEADERBOARD & TEAMS
-===================================================== */
-function renderLeaderboard() {
-  const tbody = document.getElementById("leaderboardBody");
-  if (!tbody) return;
-  const rankings = [
-    { rank: 1, name: "Rahul Sharma", bookings: 14, wins: 11, badge: "👑 Legend" },
-    { rank: 2, name: "Vikram Singh", bookings: 11, wins: 9, badge: "🔥 Striker" },
-    { rank: 3, name: "Amit Patel", bookings: 8, wins: 6, badge: "⭐ Elite" },
-    { rank: 4, name: "Demo Captain", bookings: 5, wins: 4, badge: "⚡ Active" }
+// ===================================================
+// SPIN WHEEL
+// ===================================================
+
+let totalSpin  = 0;
+let spinUsed   = false;
+
+function doSpin() {
+  if (spinUsed) {
+    toast("One spin per day — come back tomorrow!", "bad");
+    return;
+  }
+
+  spinUsed = true;
+
+  const prizes = [
+    { label: "10% OFF", pct: 0.10 },
+    { label: "30% OFF", pct: 0.30 },
+    { label: "50% OFF", pct: 0.50 },
+    { label: "20% OFF", pct: 0.20 }
   ];
+
+  const idx = Math.floor(Math.random() * prizes.length);
+  totalSpin += 1440 + idx * 90; // spin a few full rounds then land on prize
+
+  document.getElementById("wheel").style.transform = `rotate(${totalSpin}deg)`;
+
+  setTimeout(() => {
+    const p = prizes[idx];
+    document.getElementById("spinResult").textContent = `You won ${p.label}! Applied automatically.`;
+    coupons.push({ code: `SPIN${Math.round(p.pct*100)}`, discount: p.pct, ts: Date.now() });
+    localStorage.setItem("userCoupons", JSON.stringify(coupons));
+    discount = Math.max(discount, p.pct);
+    toast(`🎉 You won ${p.label}!`, "ok");
+  }, 3100);
+}
+
+// ===================================================
+// LEADERBOARD
+// ===================================================
+
+function buildLeaderboard() {
+  // hardcoded sample data for now - in prod this would come from an API
+  const data = [
+    { rank:1, name:"Rahul Sharma",  bookings:14, wins:11, badge:"👑 Legend"  },
+    { rank:2, name:"Vikram Singh",  bookings:11, wins:9,  badge:"🔥 Striker" },
+    { rank:3, name:"Amit Patel",    bookings:8,  wins:6,  badge:"⭐ Elite"   },
+    { rank:4, name:"Demo Captain",  bookings:5,  wins:4,  badge:"⚡ Active"  }
+  ];
+
+  const tbody = document.getElementById("lbBody");
   tbody.innerHTML = "";
-  rankings.forEach(r => {
+  data.forEach(r => {
     tbody.innerHTML += `
       <tr>
         <td>#${r.rank}</td>
-        <td><b>${r.name}</b></td>
+        <td><b>${esc(r.name)}</b></td>
         <td>${r.bookings}</td>
         <td>${r.wins}</td>
         <td>${r.badge}</td>
@@ -995,607 +1772,687 @@ function renderLeaderboard() {
   });
 }
 
-function createTeam() {
-  const name = document.getElementById("teamNameInput").value.trim();
-  const sport = document.getElementById("teamSportInput").value.trim();
-  const msg = document.getElementById("teamMsg");
+// ===================================================
+// TEAMS
+// ===================================================
+
+function saveTeam() {
+  const name  = document.getElementById("tName").value.trim();
+  const sport = document.getElementById("tSport").value.trim();
+  const fb    = document.getElementById("teamFeedback");
 
   if (!name || !sport) {
-    msg.style.color = "red";
-    msg.innerText = "Enter team name and sport.";
+    fb.style.color  = "red";
+    fb.textContent  = "Enter both team name and sport.";
     return;
   }
 
-  const teams = JSON.parse(localStorage.getItem("userTeams") || "[]");
-  teams.push({ name, sport, captain: currentUser?.displayName || "Captain" });
-  localStorage.setItem("userTeams", JSON.stringify(teams));
+  const teams = JSON.parse(localStorage.getItem("myTeams") || "[]");
+  teams.push({ name, sport });
+  localStorage.setItem("myTeams", JSON.stringify(teams));
 
-  document.getElementById("teamNameInput").value = "";
-  document.getElementById("teamSportInput").value = "";
-  msg.style.color = "green";
-  msg.innerText = "Team created successfully!";
-  renderMyTeams();
-  showToast("Team created!", "success");
+  document.getElementById("tName").value  = "";
+  document.getElementById("tSport").value = "";
+  fb.style.color  = "green";
+  fb.textContent  = "Team saved!";
+
+  buildTeamList();
+  toast("Team created successfully!", "ok");
 }
 
-function renderMyTeams() {
-  const list = document.getElementById("myTeamsList");
-  if (!list) return;
-  const teams = JSON.parse(localStorage.getItem("userTeams") || "[]");
+function buildTeamList() {
+  const el    = document.getElementById("teamsList");
+  const teams = JSON.parse(localStorage.getItem("myTeams") || "[]");
+
   if (!teams.length) {
-    list.innerHTML = "<p style='color:#777;'>No teams created yet.</p>";
+    el.innerHTML = "<p style='color:#999;'>No teams yet — create one!</p>";
     return;
   }
-  list.innerHTML = "";
+
+  el.innerHTML = "";
   teams.forEach(t => {
-    list.innerHTML += `<div style="padding:6px 0; border-bottom:1px solid var(--border);">🛡️ <b>${escapeHTML(t.name)}</b> (${escapeHTML(t.sport)})</div>`;
+    el.innerHTML += `
+      <div style="padding:6px 0; border-bottom:1px solid var(--line);">
+        🛡️ <b>${esc(t.name)}</b> &nbsp;·&nbsp; ${esc(t.sport)}
+      </div>
+    `;
   });
 }
 
-/* =====================================================
-   WALLET & REFERRAL
-===================================================== */
-function addWalletMoney() {
-  walletBalance += 500;
-  localStorage.setItem("walletBalance", walletBalance);
-  document.getElementById("walletBalance").innerText = walletBalance;
-  document.getElementById("walletPaySpan").innerText = walletBalance;
-  showToast("₹500 added to your digital wallet!", "success");
+// ===================================================
+// WALLET
+// ===================================================
+
+function syncWalletDisplay() {
+  document.getElementById("walletAmt").textContent         = wallet;
+  document.getElementById("walletPayDisplay").textContent  = wallet;
 }
 
-function copyReferral() {
+function topUpWallet() {
+  wallet += 500;
+  localStorage.setItem("walletBal", wallet);
+  syncWalletDisplay();
+  toast("₹500 added to your wallet!", "ok");
+}
+
+function copyRef() {
   navigator.clipboard?.writeText("https://netgrounds.app/ref/USER99");
-  showToast("Referral link copied to clipboard!", "success");
+  toast("Referral link copied!", "ok");
 }
 
-/* =====================================================
-   WEATHER WIDGET
-===================================================== */
-function checkWeather() {
-  const conditions = [
-    { text: "29°C • Clear skies, ideal for cricket & football!", city: "🌤️ STADIUM WEATHER" },
-    { text: "24°C • Pleasant breeze, great outdoor conditions.", city: "⛅ OUTDOOR ALERT" },
-    { text: "31°C • Warm & sunny. Stay hydrated!", city: "☀️ SUNNY DAY" }
+// ===================================================
+// WEATHER
+// ===================================================
+
+function refreshWeather() {
+  const options = [
+    { city:"🌤️ CLEAR",   text:"29°C • Perfect day for cricket!" },
+    { city:"⛅ CLOUDY",  text:"24°C • Comfortable with a breeze." },
+    { city:"☀️ SUNNY",   text:"31°C • Warm out. Carry water!" }
   ];
-  const rand = conditions[Math.floor(Math.random() * conditions.length)];
-  document.getElementById("weatherCity").innerText = rand.city;
-  document.getElementById("weatherDesc").innerText = rand.text;
-  showToast("Weather forecast updated!", "info");
+  const pick = options[Math.floor(Math.random() * options.length)];
+  document.getElementById("wCity").textContent = pick.city;
+  document.getElementById("wText").textContent = pick.text;
+  toast("Weather refreshed.", "note");
 }
 
-/* =====================================================
-   MAP & LOCATION
-===================================================== */
-let map;
-function initMap() {
-  if (map) return;
-  map = L.map("map").setView([28.61, 77.23], 12);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap" }).addTo(map);
+// ===================================================
+// MAP
+// ===================================================
 
-  const grounds = [
-    { name: "Premium Cricket Pitch", lat: 28.62, lng: 77.22, game: "Cricket" },
-    { name: "Football Turf Arena", lat: 28.60, lng: 77.24, game: "Football" },
-    { name: "Badminton Courts", lat: 28.63, lng: 77.21, game: "Shuttle" }
+let leafMap;
+
+function loadMap() {
+  if (mapLoaded) return;
+  mapLoaded = true;
+
+  leafMap = L.map("mapDiv").setView([28.61, 77.23], 12);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap contributors"
+  }).addTo(leafMap);
+
+  const pins = [
+    { name:"Premium Cricket Pitch",  lat:28.62, lng:77.22, sport:"Cricket"   },
+    { name:"Football Turf Arena",    lat:28.60, lng:77.24, sport:"Football"  },
+    { name:"Badminton Court Block",  lat:28.63, lng:77.21, sport:"Shuttle"   }
   ];
-  grounds.forEach(g => {
-    L.marker([g.lat, g.lng]).addTo(map).bindPopup(`<b>${g.name}</b><br>Sport: ${g.game}`);
+
+  pins.forEach(p => {
+    L.marker([p.lat, p.lng])
+      .addTo(leafMap)
+      .bindPopup(`<b>${p.name}</b><br>${p.sport}`);
   });
 }
 
-function getUserLocation() {
-  const text = document.getElementById("locationText");
+function getLocation() {
+  const el = document.getElementById("locText");
   if (!navigator.geolocation) {
-    text.innerText = "Geolocation not supported.";
+    el.textContent = "Geolocation not supported by your browser.";
     return;
   }
-  text.innerText = "Fetching location...";
-  navigator.geolocation.getCurrentPosition(pos => {
-    text.innerText = `Location found: ${pos.coords.latitude.toFixed(3)}, ${pos.coords.longitude.toFixed(3)}`;
-    showToast("Nearby grounds located!", "success");
-  }, () => {
-    text.innerText = "Location permission denied.";
-  });
+  el.textContent = "Finding your location...";
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      el.textContent = `Found you: ${pos.coords.latitude.toFixed(3)}, ${pos.coords.longitude.toFixed(3)}`;
+      toast("Nearby grounds located!", "ok");
+    },
+    () => { el.textContent = "Location permission was denied."; }
+  );
 }
 
-/* =====================================================
-   SPIN WHEEL
-===================================================== */
-let wheelRotated = 0;
-let canSpin = true;
-function spinWheel() {
-  if (!canSpin) {
-    showToast("You can only spin once per day.", "error");
-    return;
-  }
-  canSpin = false;
-  const prizes = [{ label: "10% OFF", val: 10 }, { label: "30% OFF", val: 30 }, { label: "50% OFF", val: 50 }, { label: "20% OFF", val: 20 }];
-  const idx = Math.floor(Math.random() * prizes.length);
-  const prize = prizes[idx];
-  wheelRotated += 5 * 360 + (360 - idx * 90);
-  document.getElementById("wheel").style.transform = `rotate(${wheelRotated}deg)`;
+// ===================================================
+// ADMIN
+// ===================================================
 
-  setTimeout(() => {
-    document.getElementById("spinResult").innerText = `You won ${prize.label}!`;
-    userCoupons.push({ code: `SPIN${prize.val}`, discount: prize.val / 100, createdAt: Date.now() });
-    localStorage.setItem("userCoupons", JSON.stringify(userCoupons));
-    appliedDiscount = Math.max(appliedDiscount, prize.val / 100);
-    showToast(`Won ${prize.label}! Auto-applied.`, "success");
-  }, 3000);
-}
-
-/* =====================================================
-   ADMIN DASHBOARD
-===================================================== */
-function toggleAdmin() {
+function openAdmin() {
   adminOpen = !adminOpen;
-  document.getElementById("adminPage").style.display = adminOpen ? "block" : "none";
-  if (adminOpen) document.getElementById("adminPage").scrollIntoView({ behavior: "smooth" });
+  const el = document.getElementById("adminSection");
+  el.style.display = adminOpen ? "block" : "none";
+  if (adminOpen) el.scrollIntoView({ behavior:"smooth" });
 }
 
-function adminLogin() {
-  const pass = document.getElementById("adminPassword").value;
-  if (pass !== ADMIN_PASSWORD) {
-    document.getElementById("adminMessage").innerText = "Wrong password.";
+function unlockAdmin() {
+  const pw = document.getElementById("adminPass").value;
+  if (pw !== ADMIN_PW) {
+    document.getElementById("adminErrMsg").textContent = "Incorrect password.";
     return;
   }
   adminUnlocked = true;
   document.getElementById("adminLoginBox").style.display = "none";
-  document.getElementById("adminTools").style.display = "block";
-  renderAdmin();
-  showToast("Admin panel unlocked.", "success");
+  document.getElementById("adminPanel").style.display    = "block";
+  refreshAdmin();
+  toast("Admin panel unlocked.", "ok");
 }
 
-function renderAdmin() {
+function refreshAdmin() {
   if (!adminUnlocked) return;
-  const bookings = JSON.parse(localStorage.getItem("bookings") || "[]");
-  const reviews = JSON.parse(localStorage.getItem("reviews") || "[]");
-  const tbody = document.getElementById("adminTable");
+
+  const bookings = getBookings();
+  const reviews  = JSON.parse(localStorage.getItem("reviews") || "[]");
+  const tbody    = document.getElementById("adminTbl");
+
   tbody.innerHTML = "";
-  let rev = 0;
+  let revenue = 0;
+
   bookings.forEach((b, i) => {
-    rev += Number(b.amount || 0);
+    revenue += Number(b.amount || 0);
     tbody.innerHTML += `
       <tr>
         <td>${i+1}</td>
-        <td>${escapeHTML(b.name)}</td>
-        <td>${escapeHTML(b.contact)}</td>
+        <td>${esc(b.name)}</td>
+        <td>${esc(b.phone)}</td>
         <td>${b.date}</td>
-        <td>${escapeHTML(b.game)}</td>
-        <td>${escapeHTML(b.ground)}</td>
-        <td>${b.startTime} - ${b.endTime}</td>
+        <td>${esc(b.sport)}</td>
+        <td>${esc(b.ground)}</td>
+        <td>${b.start} – ${b.end}</td>
         <td>₹${b.amount}</td>
-        <td>${escapeHTML(b.payment)}</td>
-        <td><button class="del-btn" onclick="deleteBooking(${i})">Delete</button></td>
+        <td>${esc(b.payment)}</td>
+        <td><button class="del-btn" onclick="removeBooking(${i})">Delete</button></td>
       </tr>
     `;
   });
-  document.getElementById("totalBookings").innerText = bookings.length;
-  document.getElementById("totalRevenue").innerText = "₹" + rev;
-  document.getElementById("totalReviews").innerText = reviews.length;
-  document.getElementById("noBookings").style.display = bookings.length ? "none" : "block";
+
+  document.getElementById("sTotalBook").textContent = bookings.length;
+  document.getElementById("sRevenue").textContent   = "₹" + revenue;
+  document.getElementById("sReviews").textContent   = reviews.length;
+  document.getElementById("noDataMsg").style.display = bookings.length ? "none" : "block";
 }
 
-function deleteBooking(i) {
-  const bookings = JSON.parse(localStorage.getItem("bookings") || "[]");
-  bookings.splice(i, 1);
-  localStorage.setItem("bookings", JSON.stringify(bookings));
-  renderAdmin();
-  renderPublicTimetable();
-  showToast("Booking deleted.", "info");
+function removeBooking(i) {
+  const b = getBookings();
+  b.splice(i, 1);
+  saveBookings(b);
+  refreshAdmin();
+  buildTimetable();
+  toast("Booking removed.", "note");
 }
 
-function blockMaintenanceSlot() {
-  const date = document.getElementById("maintenanceDate").value;
-  const ground = document.getElementById("maintenanceGround").value;
-  const slot = document.getElementById("maintenanceSlot").value;
+function blockSlot() {
+  const date   = document.getElementById("mDate").value;
+  const ground = document.getElementById("mGround").value;
+  const slot   = document.getElementById("mSlot").value;
+
   if (!date || !ground || !slot) {
     alert("Select date, ground, and slot.");
     return;
   }
-  const [startTime, endTime] = slot.split("|");
-  const maintenance = JSON.parse(localStorage.getItem("maintenance") || "[]");
-  maintenance.push({ date, ground, startTime, endTime });
-  localStorage.setItem("maintenance", JSON.stringify(maintenance));
-  showToast("Maintenance slot blocked.", "success");
-  renderPublicTimetable();
-  loadAvailableSlots();
+
+  const [s, e] = slot.split("|");
+  const list   = getMaintenance();
+  list.push({ date, ground, start:s, end:e });
+  localStorage.setItem("maintenance", JSON.stringify(list));
+
+  toast("Maintenance slot blocked.", "ok");
+  buildTimetable();
+  refreshSlots();
 }
 
-function populateMaintenanceSlots() {
-  const sel = document.getElementById("maintenanceSlot");
-  TIME_SLOTS.forEach(([s, e]) => sel.innerHTML += `<option value="${s}|${e}">${s} - ${e}</option>`);
+// populate maintenance slot select
+function populateMSlots() {
+  const sel = document.getElementById("mSlot");
+  SLOTS.forEach(([s, e]) => {
+    sel.innerHTML += `<option value="${s}|${e}">${s} – ${e}</option>`;
+  });
 }
-populateMaintenanceSlots();
+populateMSlots();
 
-/* =====================================================
-   BOOKING FLOW & SLOTS
-===================================================== */
-function loadGrounds() {
-  const game = document.getElementById("game").value;
-  const grounds = document.getElementById("grounds");
-  grounds.innerHTML = "";
-  document.getElementById("pitch").value = "";
-  const list = GAME_GROUNDS[game] || [];
+// ===================================================
+// BOOKING FLOW
+// ===================================================
+
+function showGrounds() {
+  const sport  = document.getElementById("sportPick").value;
+  const grid   = document.getElementById("groundGrid");
+  grid.innerHTML = "";
+  document.getElementById("chosenGround").value = "";
+
+  const list = GROUNDS[sport] || [];
   list.forEach(g => {
-    grounds.innerHTML += `
-      <div class="pitch" onclick="selectPitch(this, '${g.name}')">
-        <img src="${g.img}" onerror="this.src='https://via.placeholder.com/300x180?text=Ground'" alt="${g.name}">
-        <p>${g.name}</p>
-        <small class="available-label">● Available</small>
+    grid.innerHTML += `
+      <div class="gcard" onclick="pickGround(this, '${esc(g.name)}')">
+        <img
+          src="${g.img}"
+          onerror="this.src='https://placehold.co/300x180?text=Ground'"
+          alt="${g.name}"
+        >
+        <p>${esc(g.name)}</p>
+        <small>● Available</small>
       </div>
     `;
   });
-  loadAvailableSlots();
+
+  refreshSlots();
 }
 
-function selectPitch(el, name) {
-  document.querySelectorAll(".pitch").forEach(i => i.classList.remove("selected"));
-  el.classList.add("selected");
-  document.getElementById("pitch").value = name;
-  loadAvailableSlots();
+function pickGround(el, name) {
+  document.querySelectorAll(".gcard").forEach(c => c.classList.remove("picked"));
+  el.classList.add("picked");
+  document.getElementById("chosenGround").value = name;
+  refreshSlots();
 }
 
-function isSlotBooked(date, ground, start, end) {
-  const bookings = JSON.parse(localStorage.getItem("bookings") || "[]");
-  return bookings.some(b => b.date === date && b.ground === ground && b.startTime === start && b.endTime === end && b.status !== "Cancelled");
+function isBooked(date, ground, start, end) {
+  return getBookings().some(b =>
+    b.date   === date   &&
+    b.ground === ground &&
+    b.start  === start  &&
+    b.end    === end    &&
+    b.status !== "Cancelled"
+  );
 }
 
-function isSlotMaintenance(date, ground, start, end) {
-  const maintenance = JSON.parse(localStorage.getItem("maintenance") || "[]");
-  return maintenance.some(m => m.date === date && m.ground === ground && m.startTime === start && m.endTime === end);
+function isMaintenance(date, ground, start, end) {
+  return getMaintenance().some(m =>
+    m.date   === date   &&
+    m.ground === ground &&
+    m.start  === start  &&
+    m.end    === end
+  );
 }
 
-function loadAvailableSlots() {
-  const date = document.getElementById("bookingDate").value;
-  const ground = document.getElementById("pitch").value;
-  const box = document.getElementById("timeSlots");
-  const msg = document.getElementById("slotMessage");
-  box.innerHTML = "";
-  document.getElementById("selectedSlot").value = "";
-  document.getElementById("startTime").value = "";
-  document.getElementById("endTime").value = "";
-  document.getElementById("amount").innerText = "0";
+function refreshSlots() {
+  const date   = document.getElementById("bDate").value;
+  const ground = document.getElementById("chosenGround").value;
+  const grid   = document.getElementById("slotGrid");
+  const hint   = document.getElementById("slotHint");
+
+  grid.innerHTML = "";
+  document.getElementById("pickedSlot").value = "";
+  document.getElementById("bStart").value     = "";
+  document.getElementById("bEnd").value       = "";
+  document.getElementById("calcAmount").textContent = "0";
 
   if (!date || !ground) {
-    msg.innerText = "Select date and ground to view available slots.";
+    hint.textContent = "Choose a date and ground to see slots.";
     return;
   }
 
-  TIME_SLOTS.forEach(([start, end]) => {
-    const booked = isSlotBooked(date, ground, start, end);
-    const maintenance = isSlotMaintenance(date, ground, start, end);
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "time-slot";
+  hint.textContent = "Select an available slot below.";
+
+  SLOTS.forEach(([s, e]) => {
+    const booked = isBooked(date, ground, s, e);
+    const maint  = isMaintenance(date, ground, s, e);
+    const btn    = document.createElement("button");
+    btn.type     = "button";
+    btn.className = "slot-btn";
+
     if (booked) {
-      btn.classList.add("booked");
-      btn.innerText = `${start} - ${end} • Booked`;
-      btn.disabled = true;
-    } else if (maintenance) {
-      btn.classList.add("maintenance");
-      btn.innerText = `${start} - ${end} • Closed`;
-      btn.disabled = true;
+      btn.classList.add("taken");
+      btn.textContent = `${s}–${e} Booked`;
+      btn.disabled    = true;
+    } else if (maint) {
+      btn.classList.add("blocked");
+      btn.textContent = `${s}–${e} Closed`;
+      btn.disabled    = true;
     } else {
-      btn.innerText = `${start} - ${end} • Available`;
+      btn.textContent = `${s}–${e} Free`;
       btn.onclick = () => {
-        document.querySelectorAll(".time-slot").forEach(i => i.classList.remove("selected"));
-        btn.classList.add("selected");
-        document.getElementById("startTime").value = start;
-        document.getElementById("endTime").value = end;
-        document.getElementById("selectedSlot").value = `${start}-${end}`;
-        calculateAmount();
+        document.querySelectorAll(".slot-btn").forEach(b => b.classList.remove("chosen"));
+        btn.classList.add("chosen");
+        document.getElementById("bStart").value     = s;
+        document.getElementById("bEnd").value       = e;
+        document.getElementById("pickedSlot").value = `${s}-${e}`;
+        calcTotal();
       };
     }
-    box.appendChild(btn);
+
+    grid.appendChild(btn);
   });
-  msg.innerText = "Select an available slot.";
 }
 
-function renderPublicTimetable() {
-  const tbody = document.getElementById("publicTimetable");
+function buildTimetable() {
+  const tbody   = document.getElementById("ttBody");
   if (!tbody) return;
-  const date = document.getElementById("bookingDate")?.value || new Date().toISOString().split("T")[0];
-  const grounds = ["Pitch A", "Pitch B", "Ground 1", "Court 1"];
+
+  const date    = document.getElementById("bDate")?.value || new Date().toISOString().split("T")[0];
+  const grounds = ["Pitch A","Pitch B","Ground 1","Court 1"];
+
   tbody.innerHTML = "";
-  TIME_SLOTS.forEach(([start, end]) => {
-    let row = `<tr><td>${start} - ${end}</td>`;
+
+  SLOTS.forEach(([s, e]) => {
+    let row = `<tr><td>${s}–${e}</td>`;
     grounds.forEach(g => {
-      const booked = isSlotBooked(date, g, start, end);
-      const maint = isSlotMaintenance(date, g, start, end);
-      if (booked) row += `<td class="slot-booked">Booked</td>`;
-      else if (maint) row += `<td class="slot-maintenance">Closed</td>`;
-      else row += `<td class="slot-available">Available</td>`;
+      if      (isBooked(date, g, s, e))       row += `<td class="bk">Booked</td>`;
+      else if (isMaintenance(date, g, s, e))  row += `<td class="mn">Closed</td>`;
+      else                                     row += `<td class="av">Free</td>`;
     });
     row += "</tr>";
     tbody.innerHTML += row;
   });
 }
 
-const todayDate = new Date().toISOString().split("T")[0];
-document.getElementById("bookingDate").min = todayDate;
-document.getElementById("maintenanceDate").min = todayDate;
-document.getElementById("bookingDate").value = todayDate;
-document.getElementById("bookingDate").addEventListener("change", () => {
-  loadAvailableSlots();
-  renderPublicTimetable();
+// set date input bounds
+const TODAY = new Date().toISOString().split("T")[0];
+document.getElementById("bDate").min    = TODAY;
+document.getElementById("mDate").min    = TODAY;
+document.getElementById("bDate").value  = TODAY;
+document.getElementById("bDate").addEventListener("change", () => {
+  refreshSlots();
+  buildTimetable();
 });
 
-/* =====================================================
-   CAPTCHA & AMOUNT CALCULATION
-===================================================== */
-function generateCaptcha() {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  captchaValue = "";
-  for (let i = 0; i < 5; i++) captchaValue += chars[Math.floor(Math.random() * chars.length)];
-  document.getElementById("captchaBox").innerText = captchaValue;
+// ===================================================
+// CAPTCHA
+// ===================================================
+
+function newCaptcha() {
+  const pool = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  captchaCode = "";
+  for (let i = 0; i < 5; i++) {
+    captchaCode += pool[Math.floor(Math.random() * pool.length)];
+  }
+  document.getElementById("captchaDisplay").textContent = captchaCode;
 }
-generateCaptcha();
+newCaptcha();
 
-function calculateAmount() {
-  const start = document.getElementById("startTime").value;
-  const end = document.getElementById("endTime").value;
-  if (!start || !end) return;
+// ===================================================
+// AMOUNT CALCULATION
+// ===================================================
 
-  const minutes = (new Date(`1970-01-01T${end}`) - new Date(`1970-01-01T${start}`)) / 60000;
-  let original = minutes > 0 ? minutes * RATE_PER_MINUTE : 0;
-  appliedDiscount = 0;
+function calcTotal() {
+  const s = document.getElementById("bStart").value;
+  const e = document.getElementById("bEnd").value;
+  if (!s || !e) return;
 
+  const mins = (new Date(`1970-01-01T${e}`) - new Date(`1970-01-01T${s}`)) / 60000;
+  let base   = mins > 0 ? mins * RATE_PER_MIN : 0;
+
+  // apply discounts - weekend, first login, coupons/spin
+  discount = 0;
   const day = new Date().getDay();
-  if (day === 0 || day === 6) appliedDiscount = Math.max(appliedDiscount, 0.10);
-  if (isFirstLogin) appliedDiscount = Math.max(appliedDiscount, 0.15);
+  if (day === 0 || day === 6) discount = Math.max(discount, 0.10);
+  if (firstLogin)              discount = Math.max(discount, 0.15);
+  coupons.forEach(c => { discount = Math.max(discount, c.discount); });
 
-  userCoupons.forEach(c => appliedDiscount = Math.max(appliedDiscount, c.discount));
-
-  const final = original - (original * appliedDiscount);
-  document.getElementById("amount").innerText = Math.round(final);
-  document.getElementById("paidAmount").value = Math.round(final);
+  const final = Math.round(base - base * discount);
+  document.getElementById("calcAmount").textContent = final;
+  document.getElementById("finalAmt").value         = final;
 }
 
-function applyCoupon() {
-  const code = document.getElementById("couponCode").value.trim().toUpperCase();
-  const msg = document.getElementById("couponMessage");
+function useCoupon() {
+  const code = document.getElementById("couponInput").value.trim().toUpperCase();
+  const fb   = document.getElementById("couponFeedback");
+
   if (code === "WEEKEND10") {
-    appliedDiscount = Math.max(appliedDiscount, 0.10);
-    msg.style.color = "green";
-    msg.innerText = "Coupon applied! 10% off.";
-    calculateAmount();
-    showToast("Coupon applied successfully!", "success");
+    discount = Math.max(discount, 0.10);
+    fb.style.color  = "green";
+    fb.textContent  = "✓ Coupon applied — 10% off!";
+    calcTotal();
+    toast("Coupon applied!", "ok");
   } else {
-    msg.style.color = "red";
-    msg.innerText = "Invalid coupon. Try WEEKEND10.";
+    fb.style.color  = "red";
+    fb.textContent  = "Invalid code. Try WEEKEND10.";
   }
 }
 
-/* =====================================================
-   MULTI-STEP NAVIGATION
-===================================================== */
-function showStep(step) {
+// ===================================================
+// STEP NAVIGATION
+// ===================================================
+
+function goToStep(n) {
   for (let i = 1; i <= 4; i++) {
-    document.getElementById("step" + i).classList.toggle("active", i === step);
-    document.getElementById("dot" + i).classList.toggle("active", i === step);
-    document.getElementById("dot" + i).classList.toggle("done", i < step);
+    document.getElementById("p"    + i).classList.toggle("on",  i === n);
+    document.getElementById("node" + i).classList.toggle("on",  i === n);
+    document.getElementById("node" + i).classList.toggle("done",i  < n);
   }
-  document.getElementById("prevBtn").style.display = step > 1 ? "block" : "none";
-  document.getElementById("nextBtn").style.display = step < 4 ? "block" : "none";
-  document.getElementById("bookBtn").style.display = step === 4 ? "block" : "none";
-  document.querySelectorAll(".error").forEach(e => e.style.display = "none");
-  currentStep = step;
+
+  document.getElementById("prevBtn").style.display   = n > 1 ? "block" : "none";
+  document.getElementById("nextBtn").style.display   = n < 4 ? "block" : "none";
+  document.getElementById("submitBtn").style.display = n === 4 ? "block" : "none";
+
+  document.querySelectorAll(".err-msg").forEach(e => e.style.display = "none");
+  step = n;
 }
 
-function prevStep() { if (currentStep > 1) showStep(currentStep - 1); }
-function showError(id) { document.getElementById(id).style.display = "block"; }
+function showErr(id) { document.getElementById(id).style.display = "block"; }
 
-function nextStep() {
-  if (currentStep === 1) {
-    const name = document.getElementById("name").value.trim();
-    const contact = document.getElementById("contact").value.trim();
-    const age = document.getElementById("age").value;
-    const gender = document.getElementById("gender").value;
-    if (!name || !/^\d{10}$/.test(contact) || !age || !gender) {
-      showError("err1"); return;
+function goBack() { if (step > 1) goToStep(step - 1); }
+
+function goNext() {
+  if (step === 1) {
+    const name   = document.getElementById("fname").value.trim();
+    const phone  = document.getElementById("fphone").value.trim();
+    const age    = document.getElementById("fage").value;
+    const gender = document.getElementById("fgender").value;
+    if (!name || !/^\d{10}$/.test(phone) || !age || !gender) {
+      showErr("e1"); return;
     }
   }
-  if (currentStep === 2) {
-    if (!document.getElementById("game").value || !document.getElementById("pitch").value) {
-      showError("err2"); return;
+
+  if (step === 2) {
+    if (!document.getElementById("sportPick").value || !document.getElementById("chosenGround").value) {
+      showErr("e2"); return;
     }
   }
-  if (currentStep === 3) {
-    if (!document.getElementById("bookingDate").value || !document.getElementById("selectedSlot").value) {
-      showError("err3"); return;
+
+  if (step === 3) {
+    if (!document.getElementById("bDate").value || !document.getElementById("pickedSlot").value) {
+      showErr("e3"); return;
     }
   }
-  showStep(currentStep + 1);
+
+  goToStep(step + 1);
 }
 
-function showQR() {
-  const method = document.getElementById("paymentMethod").value;
-  const qrBox = document.getElementById("qrBox");
-  const qrImage = document.getElementById("qrImage");
-  qrBox.style.display = "none";
+function maybeShowQR() {
+  const method = document.getElementById("payMethod").value;
+  const qrArea = document.getElementById("qrArea");
+  const qrImg  = document.getElementById("qrImg");
+
+  qrArea.style.display = "none";
+
   if (method === "PhonePe" || method === "Google Pay") {
-    qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${method}Payment`;
-    qrBox.style.display = "block";
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=${encodeURIComponent(method)}`;
+    qrArea.style.display = "block";
   }
 }
 
-/* =====================================================
-   FINAL BOOKING EXECUTION
-===================================================== */
-function bookGround() {
-  const captchaInput = document.getElementById("captchaInput").value.trim().toUpperCase();
-  const payment = document.getElementById("paymentMethod").value;
-  const amount = Number(document.getElementById("amount").innerText);
-  const date = document.getElementById("bookingDate").value;
-  const ground = document.getElementById("pitch").value;
-  const startTime = document.getElementById("startTime").value;
-  const endTime = document.getElementById("endTime").value;
-  const error = document.getElementById("err4");
+// ===================================================
+// CONFIRM BOOKING
+// ===================================================
 
-  if (captchaInput !== captchaValue) {
-    error.innerText = "⚠️ Incorrect captcha.";
-    error.style.display = "block";
-    generateCaptcha();
+function confirmBooking() {
+  const captchaAnswer = document.getElementById("captchaAnswer").value.trim().toUpperCase();
+  const method        = document.getElementById("payMethod").value;
+  const amount        = Number(document.getElementById("calcAmount").textContent);
+  const err           = document.getElementById("e4");
+
+  if (captchaAnswer !== captchaCode) {
+    err.textContent      = "⚠️ Captcha doesn't match — try again.";
+    err.style.display    = "block";
+    newCaptcha();
     return;
   }
-  if (!payment) {
-    error.innerText = "⚠️ Select payment method.";
-    error.style.display = "block";
+
+  if (!method) {
+    err.textContent   = "⚠️ Choose a payment method.";
+    err.style.display = "block";
     return;
   }
-  if (payment === "Wallet") {
-    if (walletBalance < amount) {
-      error.innerText = "⚠️ Insufficient wallet balance.";
-      error.style.display = "block";
+
+  if (method === "Wallet") {
+    if (wallet < amount) {
+      err.textContent   = "⚠️ Not enough wallet balance.";
+      err.style.display = "block";
       return;
     }
-    walletBalance -= amount;
-    localStorage.setItem("walletBalance", walletBalance);
-    document.getElementById("walletBalance").innerText = walletBalance;
+    wallet -= amount;
+    localStorage.setItem("walletBal", wallet);
+    syncWalletDisplay();
   }
 
   const booking = {
-    id: Date.now(),
-    name: document.getElementById("name").value.trim(),
-    contact: document.getElementById("contact").value.trim(),
-    date,
-    game: document.getElementById("game").value,
-    ground,
-    startTime,
-    endTime,
+    id:      Date.now(),
+    name:    document.getElementById("fname").value.trim(),
+    phone:   document.getElementById("fphone").value.trim(),
+    date:    document.getElementById("bDate").value,
+    sport:   document.getElementById("sportPick").value,
+    ground:  document.getElementById("chosenGround").value,
+    start:   document.getElementById("bStart").value,
+    end:     document.getElementById("bEnd").value,
     amount,
-    payment,
-    status: "Confirmed"
+    payment: method,
+    status:  "Confirmed"
   };
 
-  const bookings = JSON.parse(localStorage.getItem("bookings") || "[]");
-  bookings.push(booking);
-  localStorage.setItem("bookings", JSON.stringify(bookings));
+  const all = getBookings();
+  all.push(booking);
+  saveBookings(all);
 
-  document.getElementById("msg").innerText = "✅ Booking confirmed successfully! WhatsApp notification sent.";
-  document.getElementById("msg").className = "success";
-  showToast("Booking confirmed successfully!", "success");
+  const msg = document.getElementById("bookingMsg");
+  msg.className   = "good";
+  msg.textContent = "✅ Booking confirmed! You'll receive a WhatsApp notification shortly.";
 
-  renderPublicTimetable();
-  if (adminUnlocked) renderAdmin();
-  setTimeout(resetBookingForm, 2500);
+  toast("Booking confirmed!", "ok");
+  buildTimetable();
+  if (adminUnlocked) refreshAdmin();
+
+  setTimeout(resetForm, 2600);
 }
 
-function resetBookingForm() {
-  ["name", "contact", "age", "gender", "game", "pitch", "startTime", "endTime", "selectedSlot", "captchaInput", "couponCode", "paymentMethod", "paidAmount"].forEach(id => {
+function resetForm() {
+  [
+    "fname","fphone","fage","fgender","sportPick",
+    "chosenGround","bStart","bEnd","pickedSlot",
+    "captchaAnswer","couponInput","payMethod","finalAmt"
+  ].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = "";
   });
-  document.getElementById("grounds").innerHTML = "";
-  document.getElementById("timeSlots").innerHTML = "";
-  document.getElementById("amount").innerText = "0";
-  document.getElementById("qrBox").style.display = "none";
-  document.getElementById("msg").innerText = "";
-  generateCaptcha();
-  showStep(1);
+
+  document.getElementById("groundGrid").innerHTML   = "";
+  document.getElementById("slotGrid").innerHTML     = "";
+  document.getElementById("calcAmount").textContent = "0";
+  document.getElementById("qrArea").style.display   = "none";
+  document.getElementById("bookingMsg").textContent  = "";
+
+  newCaptcha();
+  goToStep(1);
 }
 
-/* =====================================================
-   HISTORY & CANCELLATIONS
-===================================================== */
-function toggleHistory() {
-  const box = document.getElementById("historyBox");
-  box.style.display = box.style.display === "block" ? "none" : "block";
-  if (box.style.display === "block") {
+// ===================================================
+// HISTORY
+// ===================================================
+
+function openHistory() {
+  const el = document.getElementById("historySection");
+  const open = el.style.display === "block";
+  el.style.display = open ? "none" : "block";
+  if (!open) {
     renderHistory();
-    box.scrollIntoView({ behavior: "smooth" });
+    el.scrollIntoView({ behavior:"smooth" });
   }
 }
 
 function renderHistory() {
-  const list = document.getElementById("historyList");
-  const bookings = JSON.parse(localStorage.getItem("bookings") || "[]");
-  list.innerHTML = "";
+  const list     = document.getElementById("historyItems");
+  const bookings = getBookings();
+
   if (!bookings.length) {
-    list.innerHTML = "<p>No bookings found.</p>";
+    list.innerHTML = "<p>No bookings yet.</p>";
     return;
   }
+
+  list.innerHTML = "";
   bookings.forEach(b => {
     list.innerHTML += `
-      <div class="history-card">
-        <h3>${escapeHTML(b.game)} - ${escapeHTML(b.ground)}</h3>
-        <p>📅 ${b.date} | 🕒 ${b.startTime} - ${b.endTime}<br>💰 ₹${b.amount} | 💳 ${escapeHTML(b.payment)} | Status: <b>${escapeHTML(b.status)}</b></p>
-        ${b.status !== "Cancelled" ? `<button class="cancel-btn" onclick="cancelBooking(${b.id})">Cancel Booking</button>` : ''}
+      <div class="h-card">
+        <h3>${esc(b.sport)} — ${esc(b.ground)}</h3>
+        <p>
+          📅 ${b.date} &nbsp;|&nbsp;
+          🕒 ${b.start}–${b.end} &nbsp;|&nbsp;
+          💰 ₹${b.amount} &nbsp;|&nbsp;
+          ${esc(b.payment)} &nbsp;|&nbsp;
+          <b>${esc(b.status)}</b>
+        </p>
+        ${b.status !== "Cancelled"
+          ? `<button class="cancel-btn" onclick="cancelBooking(${b.id})">Cancel</button>`
+          : ""}
       </div>
     `;
   });
 }
 
 function cancelBooking(id) {
-  const bookings = JSON.parse(localStorage.getItem("bookings") || "[]");
-  const updated = bookings.map(b => b.id === id ? { ...b, status: "Cancelled" } : b);
-  localStorage.setItem("bookings", JSON.stringify(updated));
+  const updated = getBookings().map(b =>
+    b.id === id ? { ...b, status: "Cancelled" } : b
+  );
+  saveBookings(updated);
   renderHistory();
-  renderPublicTimetable();
-  showToast("Booking cancelled successfully.", "info");
+  buildTimetable();
+  toast("Booking cancelled.", "note");
 }
 
-/* =====================================================
-   REVIEWS
-===================================================== */
-function submitReview() {
-  const name = document.getElementById("reviewName").value.trim();
-  const rating = document.getElementById("reviewRating").value;
-  const text = document.getElementById("reviewText").value.trim();
+// ===================================================
+// REVIEWS
+// ===================================================
+
+function postReview() {
+  const name   = document.getElementById("rvName").value.trim();
+  const rating = document.getElementById("rvRating").value;
+  const text   = document.getElementById("rvText").value.trim();
+
   if (!name || !rating || !text) {
-    alert("Please complete all review fields.");
+    alert("Please fill all review fields.");
     return;
   }
+
   const reviews = JSON.parse(localStorage.getItem("reviews") || "[]");
   reviews.push({ name, rating: Number(rating), text });
   localStorage.setItem("reviews", JSON.stringify(reviews));
-  document.getElementById("reviewName").value = "";
-  document.getElementById("reviewRating").value = "";
-  document.getElementById("reviewText").value = "";
-  renderReviews();
-  showToast("Review submitted!", "success");
+
+  document.getElementById("rvName").value   = "";
+  document.getElementById("rvRating").value = "";
+  document.getElementById("rvText").value   = "";
+
+  buildReviews();
+  toast("Review posted!", "ok");
 }
 
-function renderReviews() {
-  const list = document.getElementById("reviewList");
-  if (!list) return;
+function buildReviews() {
+  const el      = document.getElementById("reviewItems");
+  if (!el) return;
   const reviews = JSON.parse(localStorage.getItem("reviews") || "[]");
-  list.innerHTML = "";
+
   if (!reviews.length) {
-    list.innerHTML = "<p style='text-align:center;color:#777;'>No reviews yet.</p>";
+    el.innerHTML = "<p style='text-align:center; color:#999;'>No reviews yet.</p>";
     return;
   }
-  reviews.slice().reverse().forEach(r => {
-    list.innerHTML += `
-      <div class="review-card">
-        <strong>${escapeHTML(r.name)}</strong>
-        <div class="review-stars">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</div>
-        <p>${escapeHTML(r.text)}</p>
+
+  el.innerHTML = "";
+  // show newest first
+  [...reviews].reverse().forEach(r => {
+    el.innerHTML += `
+      <div class="rv-card">
+        <strong>${esc(r.name)}</strong>
+        <div class="stars">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</div>
+        <p>${esc(r.text)}</p>
       </div>
     `;
   });
 }
 
-function escapeHTML(str) {
-  return String(str).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+// ===================================================
+// SCROLL HELPERS
+// ===================================================
+
+function goToBooking() {
+  document.getElementById("bookingForm").scrollIntoView({ behavior:"smooth" });
 }
 
-renderPublicTimetable();
+function goToMap() {
+  document.getElementById("mapSection").scrollIntoView({ behavior:"smooth" });
+}
+
+// ===================================================
+// INIT
+// ===================================================
+
+buildTimetable();
 </script>
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
 
 
 
