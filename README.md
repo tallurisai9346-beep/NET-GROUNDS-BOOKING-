@@ -1,130 +1,40 @@
-# 🏏 Net Grounds Booking
+# Net Grounds Booking
 
-Play More. Book Faster.
+Play More . Book Faster .
 
-Net Grounds is a sports ground booking platform created to help people find a suitable sports ground and book it faster and easier
+Net Grounds is a sports grounds booking website developed to make the booking process of the grounds easy .
 
-instead of calling different grounds and managing the availability, users can select their desired sport, choose a ground, pick up a time slot, and book it all from one website
+Users can select a sport, choose the ground, select the time, and make payments digitally .
 
-🌐 Live Website: https://net-grounds-booking.vercel.app/
+Live Website :
 
-## 📌 About the Project
+https://net-grounds-booking.vercel.app/
 
-I have created this web project to help my friends who are interested in playing sports but struggle to find a suitable ground to play in. Net Grounds allows users to book a sports ground for football, cricket, shuttle, kabaddi, hockey, and volleyball and develop their own teams and match schedules. This website aims to look and act as a real-world booking application and not just a simple project.
+## Features
 
-### 🎯 Main features
+Sports grounds booking
 
-#### 🔐 OTP Login
+Cricket, football, shuttle, kabaddi, hockey, and volleyball
 
-The users will be able to log in to their accounts via OTP, mobile number, and demo account; after logging in, the users can update their profile picture or log out of the application.
+Slots selection
 
-#### 🏟️ Multi-Sports Booking
+OTP login
 
-The users will be able to book a sports ground for different types of sports such as
+Booking history
 
-- Cricket
+Wallet and payment
 
-- Football
+Reviews
 
-- Shuttle
+Nearby grounds
 
-- Kabaddi
+Teams
 
-- Hockey
+Admin dash board
 
-- Volleyball
+Responsive design
 
-#### 📅 Easy Booking Process
-
-The booking process consists of a few easy steps such as
-
-1. Details
-
-2. Ground
-
-3. Time
-
-4. Payment
-
-The user will fill out their details, select the sport, ground, date, and time slot and make the payment. In the current version of the application, the price is calculated based on minutes and costs ₹10 per minute.
-
-#### ⏰ Live Slot Timetable
-
-The live slot timetable displays the available, maintenance, and booked time slots for the sports grounds. I have used different colors to indicate the slots
-
-- 🟢 Green – available slot
-
-- 🔴 Red – booked slot
-
-- 🟡 Yellow – maintenance slot
-
-#### 🤖 AI Ground Assistant
-
-I have integrated the AI Ground Assistant where users can ask for recommendations for booking a sports ground. For example, the user can type in the search bar “Cricket ground tomorrow evening under ₹800”.
-
-#### 📍 Find Nearby Grounds
-
-The website has a feature to locate and display the nearby sports grounds for the user.
-
-#### 👥 Teams & Match Players
-
-This application allows users to create their own teams for sports, select the sport, manage their teams, and find other players for their upcoming matches.
-
-#### 🎁 Rewards & Offers
-
-The users can get rewards and cashbacks on their bookings.
-
-- Daily spin & win – A daily spin where a user can win a discount coupon
-
-- Flip deals – The website can post special deals for sports ground booking.
-
-- Referral rewards – The users can get rewarded when they refer to a friend
-
-#### 💳 Wallet & Payments
-
-The application has a wallet feature where users can view their total available balance. The payment method includes
-
-- UPI
-
-- Google Pay
-
-- Wallet
-
-The users can also apply a coupon code before they make the final payment.
-
-#### 📜 Booking History
-
-This section displays all the previous bookings that a user has made.
-
-#### ⭐ Player Reviews
-
-The players can post reviews about their experience on the website.
-
-#### ⚙️ Admin Dashboard
-
-I have included an admin dashboard in the project that displays
-
-- All bookings
-
-- Revenue
-
-- Reviews
-
-- Booking history
-
-- Slot maintenance
-
-- Slot availability
-
-- Booking actions
-
-This dashboard allows me to see all the important data about the website to manage and improve it further.
-
-### 🧑‍💻 Technologies
-
-I have mainly focused on web development for this project.
-
-#### Frontend
+## Technologies
 
 HTML
 
@@ -132,118 +42,26 @@ CSS
 
 JavaScript
 
-#### Hosting
-
 Vercel
 
-I have implemented different concepts for this project such as
+## About the project
 
-- OTP
+Net grounds booking was my personal project where I learned and applied frontend technologies to develop a functional application that provides users with a flexible, convenient way to book sports grounds while also learning more about responsive design and form validation.
 
-- Form Validation
+## Future scope
 
-- Responsive UI
+I intend to add more features to the application like a database, payment portal, notifications, location tracking, and more sports grounds.
 
-- Booking
+## Developer
 
-- Payment
+Talluri venkata sai kumar
 
-- Location
+Email :
 
-- Admin Dashboard
+https://tallurisai9392@gmail.com
 
-- Slot Availability
-
-### 📱 Responsive Design
-
-The website is compatible with different devices such as
-
-- Computers
-
-- Laptops
-
-- Mobile Devices
-
-- Tablets
-
-The mobile view is optimized and keeps the booking process easy so that the user does not have to go through multiple tabs or windows.
-
-### 💡 Why did I make this?
-
-I wanted to create a project to showcase my skills, not just another demo application. Sports ground booking requires a lot of coordination between the players and the owner, such as calling to check the availability, negotiating the prices, etc. However, booking a sports ground from this website would solve all of these issues in one place. While making this project, I learned multiple things such as
-
-- Responsive design
-
-- Booking system
-
-- Admin dashboard design
-
-- OTP
-
-- Making applications that have a good UI/UX
-
-- Making applications that are easy for the end-user
-
-### 🚀 Future Updates
-
-Some future updates that I want to add to the application are
-
-- Advanced authentication
-
-- Implementing a real-time payment system
-
-- Production database
-
-- Advanced location search
-
-- Real-world sports grounds
-
-- Mobile application
-
-- Booking notifications
-
-- Email/SMS services
-
-- Team matchmaking
-
-- Advanced AI assistant
-
-- Advanced admin dashboard
-
-- Verified reviews
-
-### 🖥️ Project Preview
-
-The main dashboard shows all the main sections of the application, such as
-
-Book a Slot → Find Grounds → AI Assistant → Teams → Rewards → Wallet → Booking History
-
-When the user taps on book a slot, it takes them to the booking section, which guides them through the booking process.
-
-### 🌱 What did I learn?
-
-I have learned that making a website involves more than just coding; it is more than just writing some HTML, CSS, and JavaScript and putting them together. To make a great website, it is important to have a great UI/UX, a good visual appeal, an easy navigation system, and most importantly, a good purpose. This application helped me bring my frontend development, design, and problem-solving skills together and make one amazing project.
-
-### 🔗 Live Project
-
-#### 🌐 Net Grounds Booking
+Live project :
 
 https://net-grounds-booking.vercel.app/
-
-### 👨‍💻 Developer
-
-Talluri Venkata Sai Kumar
-
-I am a passionate web developer, graphic designer, video/photo editor, and I love coding in Java and Python.
-
-📧 Email: tallurisai9392@gmail.com
-
-### ❤️ Final Note
-
-Net Grounds is one of those projects that I am continuously improving every day. I have put all my efforts to make this website as realistic as possible while experimenting with different ideas such as rewards, teams, maps, AI assistant, and admin dashboard. As the project grows, I am planning to add more features to it to make it a complete sports ground booking application.
-
-Play More. Book Faster. 🏏⚽🏸
-
-##### ⭐ You are welcome to check out the website for yourself and leave me a comment about your experience. Thank you for visiting Net Grounds! 🚀
 
 © 2026 Net Grounds Booking
