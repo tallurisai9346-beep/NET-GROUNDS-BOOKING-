@@ -1,1750 +1,248 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Net Grounds - Book Your Slot</title>
-
-<!-- leaflet for map stuff -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Net Grounds</title>
 <style>
-:root{
-  --red:#8b0000;--gold:#ffcc66;--ok:#218838;--danger:#d00000;
-  --bg:#f5f6fa;--white:#fff;--text:#242424;--muted:#777;--line:#ddd;
-  --shadow:0 10px 25px rgba(0,0,0,.12);
-}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  margin:0;font-family:Arial,sans-serif;background:var(--bg);
-  color:var(--text);transition:.2s
-}
-body.dark{--bg:#151515;--white:#242424;--text:#f4f4f4;--muted:#bbb;--line:#555}
-button,input,select,textarea{font:inherit}
-button{cursor:pointer}
-.hide{display:none!important}
-
-#toasts{
-  position:fixed;right:20px;bottom:20px;z-index:9999;
-  display:flex;flex-direction:column;gap:8px
-}
-.toast{
-  min-width:260px;padding:12px 15px;border-radius:9px;color:#fff;
-  background:#444;box-shadow:0 6px 18px rgba(0,0,0,.2);
-  display:flex;justify-content:space-between
-}
-.toast.ok{background:var(--ok)}.toast.bad{background:var(--danger)}.toast.note{background:#0d6efd}
-
-#loginWrap{
-  min-height:100vh;display:grid;place-items:center;padding:20px;
-  background:linear-gradient(rgba(30,0,0,.78),rgba(30,0,0,.82)),
-  url('https://images.unsplash.com/photo-1531415074968-036ba1b575da') center/cover
-}
-.login-card{
-  width:min(410px,100%);padding:30px 25px;border-radius:18px;
-  background:rgba(255,255,255,.97);box-shadow:0 15px 45px rgba(0,0,0,.35);
-  text-align:center
-}
-.login-icon,.avatar{
-  display:grid;place-items:center;border-radius:50%;background:var(--red);color:var(--gold)
-}
-.login-icon{width:65px;height:65px;margin:auto;font-size:34px}
-.login-card h2{margin:12px 0 4px;color:var(--red)}
-.login-card small{color:#888}
-.login-card input{
-  width:100%;padding:11px;margin-top:10px;border:1px solid #ccc;border-radius:7px;outline:0
-}
-.login-card input:focus{border-color:var(--red)}
-.social-row{display:grid;gap:9px;margin-top:14px}
-.btn-google,.btn-fb,.btn-otp,.btn-demo{
-  width:100%;padding:11px;border:0;border-radius:7px;font-weight:600
-}
-.btn-google{background:#fff;color:#333;border:1px solid #ddd}
-.btn-fb{background:#1877f2;color:#fff}.btn-otp{background:var(--red);color:#fff}
-.btn-demo{background:var(--gold);color:var(--red)}
-.btn-google:hover,.btn-fb:hover,.btn-otp:hover,.btn-demo:hover{opacity:.88}
-.or-divider{display:flex;gap:10px;align-items:center;color:#aaa;font-size:12px;margin:17px 0 9px}
-.or-divider:before,.or-divider:after{content:"";height:1px;flex:1;background:#ddd}
-#loginErr{color:var(--danger);font-size:13px;min-height:18px}
-#otpHint{display:none;padding:8px 12px;margin-top:8px;border-radius:7px;background:#fff8d6;color:#7a5400;font-size:12px}
-
-#app{display:none}
-nav{
-  position:sticky;top:0;z-index:200;padding:11px 4%;
-  display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;
-  background:var(--red);color:#fff;box-shadow:0 3px 12px rgba(0,0,0,.2)
-}
-.brand{color:var(--gold);font-size:18px;font-weight:700}
-.nav-btns{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.nav-btns button{
-  padding:7px 10px;border:0;border-radius:7px;font-size:11px;font-weight:600;
-  background:#fff;color:var(--red)
-}
-.nav-btns button#adminBtn{background:var(--gold)}
-#navUser{font-size:12px;max-width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-.hero{
-  min-height:540px;display:flex;align-items:center;padding:50px 8%;color:#fff;
-  background:linear-gradient(90deg,rgba(40,0,0,.85) 40%,rgba(40,0,0,.2)),
-  url('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e') center/cover
-}
-.hero-text{max-width:640px}.hero-text h1{margin:0;font-size:clamp(32px,5vw,62px);line-height:1.08}
-.hero-text h1 em{color:var(--gold);font-style:normal}
-.hero-text p{margin:18px 0;font-size:15px;line-height:1.6;max-width:540px}
-.hero-actions,.hero-tags{display:flex;flex-wrap:wrap;gap:9px}
-.hero-tags{margin-top:17px}.hero-tags span{padding:6px 11px;border-radius:20px;background:rgba(255,255,255,.14);font-size:12px}
-.btn-primary,.btn-outline{padding:11px 19px;border-radius:8px;font-weight:700}
-.btn-primary{border:0;background:var(--gold);color:var(--red)}
-.btn-outline{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.5)}
-
-.strips{
-  max-width:1080px;margin:-25px auto 28px;padding:0 18px;
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px
-}
-.strip{
-  padding:15px 19px;border-radius:13px;color:#fff;display:flex;
-  justify-content:space-between;align-items:center;gap:12px;box-shadow:0 8px 22px rgba(0,0,0,.18)
-}
-.strip.deal{background:linear-gradient(90deg,#8b0000,#c72c2c)}
-.strip.weather{background:linear-gradient(90deg,#1565c0,#42a5f5)}
-.strip small{display:block;color:var(--gold);font-weight:700;font-size:12px}
-.strip strong{display:block;margin-top:3px;font-size:14px}
-.strip button{padding:8px 13px;border:0;border-radius:7px;font-weight:700;white-space:nowrap}
-.strip.deal button{background:var(--gold);color:var(--red)}
-.strip.weather button{background:#fff;color:#1565c0}
-
-.section,#historySection,#adminSection{max-width:1080px;margin:40px auto;padding:0 18px}
-.sec-title{text-align:center;color:var(--red);font-size:25px;margin:0 0 6px}
-.sec-sub{text-align:center;color:var(--muted);font-size:13px;margin:0}
-
-.ai-box{
-  max-width:780px;margin:30px auto;padding:19px;border-radius:15px;
-  background:linear-gradient(135deg,#2b0000,#5c0000);color:#fff;box-shadow:var(--shadow)
-}
-.ai-box h3{margin:0 0 5px;color:var(--gold)}.ai-box p{margin:0 0 10px;font-size:13px;color:#ddd}
-.chat-area{
-  height:150px;overflow:auto;padding:10px;background:rgba(0,0,0,.3);
-  border-radius:8px;margin-bottom:10px;display:flex;flex-direction:column;gap:7px;font-size:13px
-}
-.msg{padding:7px 10px;border-radius:8px;max-width:78%}
-.msg.user{background:var(--gold);color:#333;align-self:flex-end}.msg.bot{background:rgba(255,255,255,.15)}
-.ai-row{display:flex;gap:8px}.ai-row input{flex:1;padding:10px;border:0;border-radius:8px;outline:0}
-.ai-row button{padding:10px 17px;border:0;border-radius:8px;background:var(--gold);color:var(--red);font-weight:700}
-
-#spinWrap,.card,.wallet-row,.review-form,.rv-card,.pm-inner,.admin-login-box,.book-wrap{
-  background:var(--white);box-shadow:var(--shadow);border-radius:14px
-}
-#spinWrap{max-width:440px;margin:40px auto;padding:20px;text-align:center;border:2px solid var(--gold)}
-.wheel-holder{width:220px;height:220px;position:relative;margin:16px auto}
-#wheel{
-  width:100%;height:100%;border-radius:50%;border:5px solid var(--red);
-  background:conic-gradient(#ffcc66 0 90deg,#ff9900 90deg 180deg,#ff6600 180deg 270deg,#ff3300 270deg);
-  transition:transform 3s cubic-bezier(.17,.84,.17,1)
-}
-.wheel-arrow{
-  position:absolute;top:-8px;left:50%;transform:translateX(-50%);
-  border-left:10px solid transparent;border-right:10px solid transparent;border-top:20px solid var(--red);z-index:2
-}
-#spinBtn,.btn-action,.save-btn,.review-form button,.admin-login-box button{
-  border:0;border-radius:7px;background:var(--red);color:#fff;font-weight:700
-}
-#spinBtn{margin-top:12px;padding:10px 25px}.btn-action{padding:10px 15px}
-#spinResult{margin-top:10px;font-weight:700;color:var(--red);min-height:20px}
-
-.lb-table,.tt-table,table.admin-tbl{width:100%;border-collapse:collapse}
-.lb-table th,.lb-table td,.tt-table th,.tt-table td,table.admin-tbl th,table.admin-tbl td{
-  padding:9px;border-bottom:1px solid var(--line);font-size:12px;text-align:left
-}
-.lb-table th,.tt-table th,table.admin-tbl th{background:var(--red);color:var(--gold)}
-.team-grid,.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:18px}
-.card{padding:19px}.card h3{margin:0 0 10px;color:var(--red)}
-.card input,.card select,.card textarea,.admin-login-box input,
-.review-form input,.review-form select,.review-form textarea,
-.book-wrap input,.book-wrap select,.book-wrap textarea{
-  width:100%;padding:10px;margin-top:7px;border:1px solid var(--line);
-  border-radius:7px;background:var(--white);color:var(--text);outline:0
-}
-.card button.save-btn{width:100%;padding:10px;margin-top:9px}
-.wallet-row{
-  display:flex;justify-content:space-between;align-items:center;gap:12px;
-  flex-wrap:wrap;padding:17px;margin-top:14px
-}
-.wallet-row small{color:var(--muted);font-size:12px}.w-amount{font-size:22px;font-weight:700;color:var(--ok)}
-.loc-bar{
-  max-width:1080px;margin:25px auto 0;padding:17px 21px;border-radius:12px;
-  background:var(--white);box-shadow:var(--shadow);display:flex;justify-content:space-between;
-  align-items:center;gap:12px;flex-wrap:wrap
-}
-.loc-bar h3{margin:0 0 4px;color:var(--red)}.loc-bar p{margin:0;font-size:13px;color:var(--muted)}
-#mapDiv{height:360px;border-radius:13px;box-shadow:var(--shadow)}
-.feat{text-align:center;padding:19px;border-radius:13px;background:var(--white);box-shadow:var(--shadow)}
-.feat span{font-size:32px}.feat h3{color:var(--red);margin:9px 0 4px;font-size:15px}.feat p{margin:0;font-size:13px;color:var(--muted)}
-.feat:hover{transform:translateY(-3px)}
-
-#adminSection{display:none}.admin-login-box{max-width:380px;padding:19px}
-.admin-login-box input{margin-top:8px}.admin-login-box button{width:100%;padding:10px;margin-top:9px}
-#adminPanel{display:none}.stats-row{display:flex;flex-wrap:wrap;gap:13px;margin:17px 0}
-.stat{flex:1;min-width:150px;padding:15px;border-radius:10px;background:var(--red);color:var(--gold);text-align:center}
-.stat h3{margin:0;font-size:23px}.stat p{margin:4px 0 0;font-size:12px}
-.tbl-wrap,.tt-wrap{overflow-x:auto}.del-btn{padding:4px 8px;border:0;border-radius:4px;background:#d00;color:#fff;font-size:11px}
-
-.book-wrap{max-width:760px;margin:42px auto;padding:27px}
-.book-wrap h2{text-align:center;color:var(--red);margin-top:0}
-.steps{display:flex;justify-content:space-between;gap:5px;margin:23px 0}
-.step-node{flex:1;text-align:center;font-size:11px;color:#aaa}
-.step-node .dot{
-  width:32px;height:32px;margin:0 auto 4px;border-radius:50%;
-  background:#ccc;color:#fff;font-weight:700;line-height:32px
-}
-.step-node.on{color:var(--red);font-weight:700}.step-node.on .dot{background:var(--red)}.step-node.done .dot{background:var(--ok)}
-.panel{display:none}.panel.on{display:block}
-label{display:block;margin-top:13px;font-weight:600;font-size:13px}
-.book-wrap input:focus,.book-wrap select:focus{border-color:var(--red)}
-.ground-grid,.slot-grid{display:grid;gap:9px;margin-top:9px}
-.ground-grid{grid-template-columns:repeat(auto-fill,minmax(135px,1fr))}
-.slot-grid{grid-template-columns:repeat(auto-fill,minmax(115px,1fr))}
-.gcard{border:2px solid transparent;border-radius:8px;background:var(--bg);text-align:center;cursor:pointer;overflow:hidden}
-.gcard:hover{box-shadow:var(--shadow);transform:translateY(-2px)}
-.gcard.picked{border-color:var(--red);background:#fff3f3}
-.gcard img{width:100%;height:88px;object-fit:cover}.gcard p{margin:6px 0 2px;font-weight:700;font-size:12px}
-.gcard small{display:block;margin-bottom:5px;color:var(--ok);font-size:11px}
-.slot-btn{padding:9px 4px;border:1px solid #b9e4bd;border-radius:7px;background:#f1fff2;color:#187b18;font-size:11px;font-weight:700}
-.slot-btn.taken{background:#fff0f0;border-color:#ffb4b4;color:#c00}.slot-btn.blocked{background:#fffbef;border-color:#e6c75f;color:#7a5400}
-.slot-btn.chosen{background:var(--red);border-color:var(--red);color:#fff}
-.slot-hint,.amount-row{margin-top:9px;padding:9px 11px;border-radius:8px;font-size:12px}
-.slot-hint{background:#fff8e6;color:#7a5400}.amount-row{border:1px dashed var(--gold);background:#fffbef;color:#6a4d00;text-align:center;font-size:17px}
-#captchaDisplay{padding:10px;background:#1a1a1a;border-radius:7px;color:var(--gold);letter-spacing:8px;font-size:19px;font-weight:900;text-align:center;margin-top:7px}
-#qrArea{display:none;margin-top:12px;text-align:center}#qrImg{width:170px;border-radius:8px;border:1px solid var(--line)}
-.form-nav{display:flex;gap:9px;margin-top:19px}.form-nav button{flex:1;padding:11px;border:0;border-radius:7px;font-weight:700}
-#prevBtn{background:#ddd;color:#333;display:none}#nextBtn{background:var(--red);color:var(--gold)}#submitBtn{background:var(--ok);color:#fff;display:none}
-.err-msg{display:none;color:red;font-size:12px;margin-top:7px}
-#bookingMsg{margin-top:15px;text-align:center;font-weight:700}.good{color:var(--ok)}.fail{color:var(--danger)}
-.tt-table{min-width:580px}.tt-table td{text-align:center}.tt-table .av{background:#eaffed;color:#167a24;font-weight:700}
-.tt-table .bk{background:#ffe5e5;color:#b00;font-weight:700}.tt-table .mn{background:#fff2bf;color:#7a5400;font-weight:700}
-.h-card{padding:14px;margin-top:9px;border-left:5px solid var(--red);border-radius:8px;background:var(--white);box-shadow:var(--shadow)}
-.h-card h3{margin:0;color:var(--red);font-size:15px}.h-card p{margin:5px 0 0;font-size:13px;color:var(--muted)}
-.cancel-btn{margin-top:8px;padding:5px 9px;border:0;border-radius:4px;background:#d00;color:#fff;font-size:12px}
-.review-form{max-width:580px;margin:0 auto 20px;padding:19px}.review-form button{width:100%;padding:10px;margin-top:9px}
-.rv-card{padding:13px;margin-top:9px}.rv-card strong{color:var(--red)}.rv-card .stars{color:#f5a400}
-#profileModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.58);z-index:9000;place-items:center;padding:20px}
-.pm-inner{width:min(430px,100%);padding:23px}.pm-head{display:flex;align-items:center;gap:15px;flex-wrap:wrap}
-.avatar{width:70px;height:70px;font-size:28px;font-weight:700}.pm-head h3{margin:0;color:var(--red)}
-.pm-head p{margin:3px 0;font-size:13px;color:var(--muted)}.pm-inner hr{border:0;border-top:1px solid var(--line);margin:15px 0}
-.pm-inner h4{margin:0 0 8px;color:var(--red)}.badge-row{display:flex;flex-wrap:wrap;gap:7px}
-.badge{padding:5px 10px;border-radius:18px;background:#fff3c4;color:#7a5400;font-size:11px;font-weight:700}
-footer{padding:21px 16px;background:#1e0000;color:#ccc;text-align:center;font-size:12px}
-@media(max-width:720px){
-  nav{flex-direction:column;align-items:flex-start}.nav-btns{width:100%;justify-content:space-between}
-  .hero{min-height:440px;padding:36px 6%}.book-wrap{margin:30px 12px;padding:20px}
-}
-.review-items{max-width:860px;margin:0 auto}.pm-inner .btn-action{width:100%;margin-top:18px}</style>
+*{box-sizing:border-box} :root{--g:#173d2b;--bg:#f3f0e6;--card:#fffdf7;--y:#d9ed70;--o:#e87538;--t:#20261f;--m:#6e756e;--l:#d7d2c5}
+body{margin:0;background:var(--bg);color:var(--t);font-family:Arial,Helvetica,sans-serif}button,input,select{font:inherit}button{cursor:pointer}.hide{display:none!important}
+header{background:var(--g);color:#fff;padding:14px 6%;display:flex;justify-content:space-between;align-items:center;gap:15px}.logo{font-weight:bold;letter-spacing:1px}.logo span{color:var(--y)}
+nav{display:flex;gap:6px;flex-wrap:wrap}nav button{background:none;color:#fff;border:1px solid #557060;padding:7px 10px;border-radius:4px}
+.hero{min-height:430px;padding:70px 8%;display:flex;align-items:center;color:#fff;background:linear-gradient(90deg,rgba(23,61,43,.96),rgba(23,61,43,.45)),url("https://images.unsplash.com/photo-1531415074968-036ba1b575da") center/cover}
+.hero div{max-width:650px}.hero small{color:var(--y);font-weight:bold;letter-spacing:2px}.hero h1{font-size:clamp(42px,7vw,74px);line-height:.95;margin:12px 0}.hero h1 span{color:var(--y)}.hero p{line-height:1.6;max-width:560px;color:#e8eee9}
+.main-btn,.second-btn{padding:11px 16px;border-radius:5px;font-weight:bold}.main-btn{background:var(--y);border:0;color:var(--g)}.second-btn{background:transparent;border:1px solid #fff;color:#fff}
+.wrap{max-width:1080px;margin:auto;padding:0 18px}section{margin:48px 0}h2{color:var(--g);margin-bottom:5px}.note{color:var(--m);font-size:14px}
+.info-row{margin-top:-20px;display:grid;grid-template-columns:1fr 1fr;gap:12px}.info{background:var(--card);border:1px solid var(--l);border-left:5px solid var(--o);padding:14px}.info b{display:block;margin-bottom:4px}.info span{font-size:13px;color:var(--m)}
+.game-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.game{background:var(--card);border:1px solid var(--l);padding:18px}.game h3{color:var(--g);margin:0 0 6px}.game p{font-size:13px;color:var(--m);line-height:1.5}.game button,.card button,.profile-box button{border:0;background:var(--g);color:#fff;padding:9px 12px;border-radius:4px}
+.challenge{background:var(--g);color:#fff;padding:20px;border-left:8px solid var(--y)}.challenge h2{color:var(--y);margin-top:0}.challenge button{border:0;background:var(--y);color:var(--g);padding:10px 14px;font-weight:bold;border-radius:4px}
+.book{background:var(--card);border:1px solid var(--l);padding:24px;max-width:760px;margin:auto}.steps{display:flex;gap:5px;margin-bottom:25px}.steps span{height:5px;flex:1;background:#d4d0c6}.steps span.active{background:var(--g)}.step{display:none}.step.show{display:block}
+label{display:block;font-size:13px;font-weight:bold;margin:13px 0 5px}input,select{width:100%;padding:10px;background:#fff;border:1px solid var(--l);border-radius:4px}
+.ground-list,.slot-list{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.ground-btn,.slot-btn{background:#fff;border:1px solid var(--l);padding:10px;border-radius:4px;text-align:left}.ground-btn.selected,.slot-btn.selected{background:#edf5d8;border:2px solid var(--g)}.slot-btn.used{color:#a33;background:#f8e5e0;border-color:#e2aaa1}
+.total{margin-top:14px;padding:13px;background:#edf5d8;color:var(--g);text-align:center;font-size:18px}.form-buttons{display:flex;gap:8px;margin-top:20px}.form-buttons button{flex:1;border:0;padding:11px;border-radius:4px;font-weight:bold}.back{background:#ddd9cf}.next{background:var(--g);color:#fff}.confirm{background:var(--o);color:#fff}.error{color:#b53a32;font-size:12px;min-height:17px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}.card{background:var(--card);border:1px solid var(--l);padding:18px}.card h3{color:var(--g);margin-top:0}.history-item,.team-item{padding:9px 0;border-bottom:1px solid var(--l)}
+.table-box{overflow:auto}table{width:100%;border-collapse:collapse;background:var(--card)}th,td{padding:9px;border-bottom:1px solid var(--l);font-size:12px;text-align:left}th{background:var(--g);color:var(--y)}.free{color:#28763e;font-weight:bold}.booked{color:#b33;font-weight:bold}
+#login{min-height:100vh;display:grid;place-items:center;padding:20px;background:var(--g)}.login-box{width:min(390px,100%);background:var(--card);padding:28px;border-top:7px solid var(--y)}.login-box h1{color:var(--g);margin:0}.login-box p{color:var(--m);font-size:13px;line-height:1.5}.login-box button{width:100%;padding:11px;margin-top:9px;border:0;border-radius:4px}.login-btn{background:var(--g);color:#fff}.demo-btn{background:var(--y);color:var(--g)}
+#profile{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;place-items:center;padding:20px}.profile-box{background:var(--card);width:min(400px,100%);padding:22px}
+footer{background:#10291d;color:#d9e0da;padding:25px;text-align:center;font-size:12px}
+@media(max-width:720px){header{align-items:flex-start;flex-direction:column}.info-row,.game-grid,.two{grid-template-columns:1fr}.ground-list,.slot-list{grid-template-columns:1fr 1fr}.hero{padding:55px 7%}}
+@media(max-width:430px){.ground-list,.slot-list{grid-template-columns:1fr}}
+</style>
 </head>
-
 <body>
 
-<div id="toasts"></div>
-
-<!-- =============== LOGIN PAGE =============== -->
-<div id="loginWrap">
-  <div class="login-card">
-
-    <div class="login-icon">🏏</div>
-    <h2>Net Grounds</h2>
-    <small>Book slots, build teams, earn rewards</small>
-
-    <div class="social-row" style="margin-top:18px;">
-      <button class="btn-google" onclick="loginGoogle()">
-        <b>G</b> &nbsp;Continue with Google
-      </button>
-      <button class="btn-fb" onclick="loginFB()">
-        <b>f</b> &nbsp;Continue with Facebook
-      </button>
-    </div>
-
-    <div class="or-divider"><span>OR</span></div>
-
-    <input
-      id="phoneInput"
-      type="tel"
-      maxlength="10"
-      inputmode="numeric"
-      placeholder="Enter 10-digit mobile number"
-      oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)"
-    >
-    <button class="btn-otp" style="margin-top:10px; width:100%;" onclick="sendOTP()">
-      Send OTP
-    </button>
-
-    <div id="otpSection" style="display:none;">
-      <input
-        id="otpInput"
-        type="text"
-        maxlength="6"
-        inputmode="numeric"
-        placeholder="Enter the OTP"
-        style="margin-top:10px;"
-        oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)"
-      >
-      <button class="btn-otp" style="margin-top:8px; width:100%;" onclick="checkOTP()">
-        Verify
-      </button>
-    </div>
-
-    <div id="otpHint"></div>
-    <p id="loginErr"></p>
-
-    <button class="btn-demo" onclick="quickDemo()">Try Demo Account</button>
-
-  </div>
+<div id="login">
+<div class="login-box">
+<h1>NET GROUNDS</h1>
+<p>Book a ground, call your team and get on with the game.</p>
+<label>Mobile number</label>
+<input id="loginPhone" maxlength="10" inputmode="numeric" placeholder="10 digit number" oninput="digits(this)">
+<button class="login-btn" onclick="sendOtp()">Send OTP</button>
+<div id="otpArea" class="hide"><label>OTP</label><input id="otp" maxlength="6" inputmode="numeric" placeholder="Enter OTP" oninput="digits(this)"><button class="login-btn" onclick="verifyOtp()">Verify OTP</button></div>
+<button class="demo-btn" onclick="demoLogin()">Use Demo Account</button>
+<p id="loginMsg"></p>
+</div>
 </div>
 
-<!-- =============== MAIN APP =============== -->
-<div id="app">
+<div id="app" class="hide">
+<header><div class="logo">NET <span>GROUNDS</span></div><nav>
+<button onclick="go('booking')">Book</button><button onclick="go('grounds')">Grounds</button><button onclick="showHistory()">History</button><button onclick="showProfile()">Profile</button><button onclick="logout()">Exit</button>
+</nav></header>
 
-  <nav>
-    <span class="brand">🏏 Net Grounds Pro</span>
-    <div class="nav-btns">
-      <span id="navUser">Captain</span>
-      <button onclick="toggleDark()">🌙</button>
-      <button onclick="openProfile()">👤 Profile</button>
-      <button onclick="openHistory()">📜 History</button>
-      <button id="adminBtn" onclick="openAdmin()">⚙ Admin</button>
-      <button onclick="logout()">Logout</button>
-    </div>
-  </nav>
+<section class="hero"><div>
+<small>SPORTS BOOKING WITHOUT THE DRAMA</small>
+<h1>Pick it.<br><span>Play it.</span></h1>
+<p>Choose a sport, grab a free slot and bring your team. The site keeps the booking part simple.</p>
+<button class="main-btn" onclick="go('booking')">Book a slot</button>
+<button class="second-btn" onclick="randomGame()">Surprise me</button>
+</div></section>
 
-  <!-- hero -->
-  <section class="hero">
-    <div class="hero-text">
-      <h1>Play More.<br><em>Book Faster.</em></h1>
-      <p>Cricket, football, shuttle, kabaddi, hockey & volleyball grounds with live slots, team tools, and daily rewards.</p>
-      <div class="hero-actions">
-        <button class="btn-primary" onclick="goToBooking()">Book a Slot →</button>
-        <button class="btn-outline" onclick="goToMap()">See Grounds on Map</button>
-      </div>
-      <div class="hero-tags">
-        <span>✅ Instant Confirmation</span>
-        <span>👥 Team Matchmaking</span>
-        <span>🎟️ Referral Rewards</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- deals & weather -->
-  <div class="strips">
-    <div class="strip deal">
-      <div>
-        <small>🔥 FLASH DEAL</small>
-        <strong>Book 90+ mins & get 15% OFF</strong>
-      </div>
-      <button onclick="goToBooking()">Claim</button>
-    </div>
-
-    <div class="strip weather" id="weatherStrip">
-      <div>
-        <small id="wCity">🌤️ WEATHER</small>
-        <strong id="wText">28°C • Perfect outdoor conditions!</strong>
-      </div>
-      <button onclick="refreshWeather()">Refresh</button>
-    </div>
-  </div>
-
-  <!-- AI assistant -->
-  <section class="section">
-    <div class="ai-box">
-      <h3>🤖 AI Ground Assistant</h3>
-      <p>Ask for recommendations — "Cricket ground tomorrow evening under ₹800"</p>
-      <div class="chat-area" id="chatArea">
-        <div class="msg bot">Hi! I can help you find the right ground. What sport are you looking for?</div>
-      </div>
-      <div class="ai-row">
-        <input id="aiInput" placeholder="Type your question..." onkeydown="if(event.key==='Enter')aiAsk()">
-        <button onclick="aiAsk()">Ask</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- spin wheel -->
-  <div id="spinWrap">
-    <h2 class="sec-title" style="margin-top:0;">🎡 Daily Spin & Win</h2>
-    <p class="sec-sub" style="margin-bottom:0;">One spin per day — win discount coupons!</p>
-    <div class="wheel-holder">
-      <div class="wheel-arrow"></div>
-      <div id="wheel"></div>
-    </div>
-    <button id="spinBtn" onclick="doSpin()">SPIN NOW</button>
-    <p id="spinResult"></p>
-  </div>
-
-  <!-- leaderboard -->
-  <section class="section">
-    <h2 class="sec-title">🏆 Top Players This Month</h2>
-    <p class="sec-sub">Most active captains on the platform.</p>
-    <div class="card" style="overflow-x:auto; padding:16px;">
-      <table class="lb-table">
-        <thead>
-          <tr>
-            <th>Rank</th>
-            <th>Player</th>
-            <th>Bookings</th>
-            <th>Wins</th>
-            <th>Badge</th>
-          </tr>
-        </thead>
-        <tbody id="lbBody"></tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- teams -->
-  <section class="section">
-    <h2 class="sec-title">👥 Teams & Matchmates</h2>
-    <p class="sec-sub">Create your squad or find players for your next match.</p>
-    <div class="team-grid">
-
-      <div class="card">
-        <h3>Create a Team</h3>
-        <input id="tName" placeholder="Team name (e.g. Blasters XI)">
-        <input id="tSport" placeholder="Sport (e.g. Cricket)">
-        <button class="save-btn" onclick="saveTeam()">Save Team</button>
-        <p id="teamFeedback"></p>
-      </div>
-
-      <div class="card">
-        <h3>My Teams</h3>
-        <div id="teamsList" style="margin-top:8px; font-size:13px; max-height:140px; overflow-y:auto;"></div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- wallet & referral -->
-  <section class="section">
-    <h2 class="sec-title">💳 Wallet & Referrals</h2>
-
-    <div class="wallet-row">
-      <div>
-        <small>Available Balance</small>
-        <div class="w-amount">₹<span id="walletAmt">250</span></div>
-      </div>
-      <button class="btn-action" onclick="topUpWallet()">+ Add ₹500</button>
-    </div>
-
-    <div class="wallet-row">
-      <div>
-        <small>Invite friends & earn ₹100 each</small>
-        <strong>Your link: <span id="refLink" style="color:var(--red);">netgrounds.app/ref/USER99</span></strong>
-      </div>
-      <button class="btn-action" onclick="copyRef()">Copy Link</button>
-    </div>
-  </section>
-
-  <!-- location bar -->
-  <div class="loc-bar">
-    <div>
-      <h3>📍 Find Grounds Near You</h3>
-      <p id="locText">Enable location to discover nearby grounds.</p>
-    </div>
-    <button class="btn-action" onclick="getLocation()">Use My Location</button>
-  </div>
-
-  <!-- map -->
-  <section class="section" id="mapSection">
-    <h2 class="sec-title">Grounds on the Map</h2>
-    <p class="sec-sub">Click any pin to see ground details.</p>
-    <div id="mapDiv"></div>
-  </section>
-
-  <!-- feature highlights -->
-  <section class="section">
-    <h2 class="sec-title">Why Players Choose Us</h2>
-    <p class="sec-sub">Everything you need for a great game.</p>
-    <div class="feat-grid">
-      <div class="feat">
-        <span>⚡</span>
-        <h3>Instant Booking</h3>
-        <p>Reserve your slot in seconds.</p>
-      </div>
-      <div class="feat">
-        <span>📍</span>
-        <h3>Nearby Grounds</h3>
-        <p>Find the closest venues fast.</p>
-      </div>
-      <div class="feat">
-        <span>🗓️</span>
-        <h3>Live Timetable</h3>
-        <p>Real-time slot availability.</p>
-      </div>
-      <div class="feat">
-        <span>💳</span>
-        <h3>Easy Payments</h3>
-        <p>Pay via UPI, GPay or Wallet.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ADMIN SECTION -->
-  <section id="adminSection">
-    <h2>⚙ Admin Dashboard</h2>
-
-    <div id="adminLoginBox" class="admin-login-box">
-      <h3 style="margin-top:0;">Admin Login</h3>
-      <input id="adminPass" type="password" placeholder="Enter admin password">
-      <button onclick="unlockAdmin()">Unlock Panel</button>
-      <p id="adminErrMsg"></p>
-    </div>
-
-    <div id="adminPanel">
-      <div class="stats-row">
-        <div class="stat"><h3 id="sTotalBook">0</h3><p>Total Bookings</p></div>
-        <div class="stat"><h3 id="sRevenue">₹0</h3><p>Revenue</p></div>
-        <div class="stat"><h3 id="sReviews">0</h3><p>Reviews</p></div>
-      </div>
-
-      <!-- maintenance block tool -->
-      <div class="card" style="margin-bottom:18px;">
-        <h3 style="margin-top:0;">Block Maintenance Slot</h3>
-        <input id="mDate" type="date" style="width:100%; padding:9px; margin-top:8px; border:1px solid var(--line); border-radius:6px; background:var(--white); color:var(--txt);">
-        <select id="mGround" style="width:100%; padding:9px; margin-top:8px; border:1px solid var(--line); border-radius:6px; background:var(--white); color:var(--txt);">
-          <option value="">Select Ground</option>
-          <option>Pitch A</option><option>Pitch B</option><option>Pitch C</option>
-          <option>Ground 1</option><option>Ground 2</option>
-          <option>Court 1</option><option>Court 2</option>
-        </select>
-        <select id="mSlot" style="width:100%; padding:9px; margin-top:8px; border:1px solid var(--line); border-radius:6px; background:var(--white); color:var(--txt);">
-          <option value="">Select Slot</option>
-        </select>
-        <button
-          style="margin-top:10px; padding:9px 16px; border:none; border-radius:6px; background:#7a5400; color:white; font-weight:700;"
-          onclick="blockSlot()"
-        >Block Slot</button>
-      </div>
-
-      <div class="tbl-wrap card">
-        <h3 style="margin-top:0;">All Bookings</h3>
-        <table class="admin-tbl">
-          <thead>
-            <tr>
-              <th>#</th><th>Name</th><th>Phone</th><th>Date</th>
-              <th>Game</th><th>Ground</th><th>Time</th>
-              <th>Amount</th><th>Payment</th><th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="adminTbl"></tbody>
-        </table>
-        <p id="noDataMsg" style="text-align:center; color:#999; padding:10px;">No bookings yet.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- BOOKING FORM -->
-  <section class="book-wrap" id="bookingForm">
-    <h2>Book Your Ground</h2>
-
-    <!-- progress dots -->
-    <div class="steps">
-      <div class="step-node on" id="node1"><div class="dot">1</div>Details</div>
-      <div class="step-node"    id="node2"><div class="dot">2</div>Ground</div>
-      <div class="step-node"    id="node3"><div class="dot">3</div>Time</div>
-      <div class="step-node"    id="node4"><div class="dot">4</div>Payment</div>
-    </div>
-
-    <!-- step 1 -->
-    <div class="panel on" id="p1">
-      <label>Full Name</label>
-      <input id="fname" placeholder="Enter your name">
-
-      <label>Phone Number</label>
-      <input
-        id="fphone"
-        maxlength="10"
-        inputmode="numeric"
-        placeholder="10-digit mobile"
-        oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)"
-      >
-
-      <label>Age</label>
-      <input id="fage" type="number" min="5" max="100" placeholder="Your age">
-
-      <label>Gender</label>
-      <select id="fgender">
-        <option value="">-- Select --</option>
-        <option>Male</option>
-        <option>Female</option>
-        <option>Other</option>
-      </select>
-
-      <p class="err-msg" id="e1">⚠️ Fill in all details. Phone must be 10 digits.</p>
-    </div>
-
-    <!-- step 2 -->
-    <div class="panel" id="p2">
-      <label>Select Sport</label>
-      <select id="sportPick" onchange="showGrounds()">
-        <option value="">-- Select Sport --</option>
-        <option value="cricket">Cricket</option>
-        <option value="shuttle">Badminton / Shuttle</option>
-        <option value="football">Football</option>
-        <option value="kabaddi">Kabaddi</option>
-        <option value="hockey">Hockey</option>
-        <option value="volleyball">Volleyball</option>
-      </select>
-
-      <label>Pick a Ground</label>
-      <div class="ground-grid" id="groundGrid"></div>
-      <input type="hidden" id="chosenGround">
-
-      <p class="err-msg" id="e2">⚠️ Select a sport and a ground to continue.</p>
-    </div>
-
-    <!-- step 3 -->
-    <div class="panel" id="p3">
-      <label>Date</label>
-      <input id="bDate" type="date">
-
-      <label>Available Slots</label>
-      <p class="slot-hint" id="slotHint">Choose a date and ground first.</p>
-      <div class="slot-grid" id="slotGrid"></div>
-      <input type="hidden" id="pickedSlot">
-
-      <label>Start</label>
-      <input id="bStart" type="time" readonly>
-      <label>End</label>
-      <input id="bEnd" type="time" readonly>
-
-      <div class="amount-row">
-        Total: <strong>₹<span id="calcAmount">0</span></strong>
-        <br><small style="font-size:11px; color:#999;">₹10 per minute</small>
-      </div>
-
-      <p class="err-msg" id="e3">⚠️ Pick a date and an available slot.</p>
-    </div>
-
-    <!-- step 4 -->
-    <div class="panel" id="p4">
-      <label>Captcha Check</label>
-      <div id="captchaDisplay"></div>
-      <input id="captchaAnswer" placeholder="Type the text above" style="margin-top:8px;">
-
-      <label>Active Coupons</label>
-      <p id="couponDisplay" style="font-size:12px; color:var(--ok); font-weight:700; margin:4px 0;"></p>
-
-      <label>Coupon Code</label>
-      <input id="couponInput" placeholder="e.g. WEEKEND10">
-      <button
-        type="button"
-        style="margin-top:8px; width:100%; padding:10px; border:none; border-radius:7px; background:var(--red); color:white; font-weight:700;"
-        onclick="useCoupon()"
-      >Apply Coupon</button>
-      <p id="couponFeedback" style="font-size:12px; margin-top:5px;"></p>
-
-      <label>Final Amount</label>
-      <input id="finalAmt" readonly>
-
-      <label>Payment Method</label>
-      <select id="payMethod" onchange="maybeShowQR()">
-        <option value="">-- Choose --</option>
-        <option value="Wallet">Digital Wallet (Balance: ₹<span id="walletPayDisplay">250</span>)</option>
-        <option value="PhonePe">PhonePe</option>
-        <option value="Google Pay">Google Pay</option>
-      </select>
-
-      <div id="qrArea">
-        <img id="qrImg" alt="QR Code">
-        <p><b>📱 Scan to Pay</b></p>
-      </div>
-
-      <p class="err-msg" id="e4">⚠️ Solve the captcha and choose a payment method.</p>
-    </div>
-
-    <div class="form-nav">
-      <button id="prevBtn" onclick="goBack()">← Back</button>
-      <button id="nextBtn" onclick="goNext()">Next →</button>
-      <button id="submitBtn" onclick="confirmBooking()">✅ Confirm & Pay</button>
-    </div>
-
-    <p id="bookingMsg"></p>
-  </section>
-
-  <!-- TIMETABLE -->
-  <section class="section">
-    <h2 class="sec-title">Ground Timetable</h2>
-    <p class="sec-sub">Green = free, Red = booked, Yellow = maintenance</p>
-    <div class="tt-wrap">
-      <table class="tt-table">
-        <thead>
-          <tr>
-            <th>Time</th>
-            <th>Pitch A</th>
-            <th>Pitch B</th>
-            <th>Ground 1</th>
-            <th>Court 1</th>
-          </tr>
-        </thead>
-        <tbody id="ttBody"></tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- HISTORY -->
-  <section id="historySection">
-    <div class="section">
-      <h2 class="sec-title">My Booking History</h2>
-      <div id="historyItems"></div>
-    </div>
-  </section>
-
-  <!-- REVIEWS -->
-  <section class="section">
-    <h2 class="sec-title">Player Reviews</h2>
-
-    <div class="review-form">
-      <input id="rvName" placeholder="Your name">
-      <select id="rvRating">
-        <option value="">Star rating</option>
-        <option value="5">★★★★★ Excellent</option>
-        <option value="4">★★★★ Very Good</option>
-        <option value="3">★★★ Good</option>
-        <option value="2">★★ Average</option>
-        <option value="1">★ Poor</option>
-      </select>
-      <textarea id="rvText" rows="3" placeholder="What did you think?"></textarea>
-      <button onclick="postReview()">Post Review</button>
-    </div>
-
-    <div id="reviewItems" class="review-items"></div>
-  </section>
-
-  <footer>© 2025 Net Grounds Pro &nbsp;|&nbsp; Play. Compete. Enjoy.</footer>
+<div class="wrap">
+<div class="info-row">
+<div class="info"><b>Weekend deal</b><span>10% off your first weekend booking.</span></div>
+<div class="info"><b>Player streak: <span id="streak">0</span></b><span>Complete bookings to keep your streak going.</span></div>
 </div>
 
-<!-- PROFILE MODAL -->
-<div id="profileModal">
-  <div class="pm-inner">
-    <div class="pm-head">
-      <div class="avatar" id="pmAvatar">C</div>
-      <div>
-        <h3 id="pmName">Captain</h3>
-        <p id="pmPhone">--</p>
-      </div>
-    </div>
-    <hr>
-    <h4>🏅 Achievements</h4>
-    <div class="badge-row" id="pmBadges">
-      <span class="badge">🥉 First Match</span>
-    </div>
-    <button
-      style="margin-top:18px; width:100%; padding:10px; border:none; border-radius:8px; background:var(--red); color:white; font-weight:700;"
-      onclick="closeProfile()"
-    >Close</button>
-  </div>
+<section id="grounds"><h2>Pick your game</h2><p class="note">Nothing complicated. Choose what you actually want to play.</p>
+<div class="game-grid">
+<div class="game"><h3>🏏 Cricket</h3><p>Pitches for nets and small matches.</p><button onclick="chooseSport('cricket')">Book cricket</button></div>
+<div class="game"><h3>⚽ Football</h3><p>Small turf games with evening slots.</p><button onclick="chooseSport('football')">Book football</button></div>
+<div class="game"><h3>🏸 Badminton</h3><p>Indoor courts for quick matches.</p><button onclick="chooseSport('badminton')">Book badminton</button></div>
+<div class="game"><h3>🤼 Kabaddi</h3><p>A proper court for team games.</p><button onclick="chooseSport('kabaddi')">Book kabaddi</button></div>
+<div class="game"><h3>🏐 Volleyball</h3><p>Get your group together and play.</p><button onclick="chooseSport('volleyball')">Book volleyball</button></div>
+</div></section>
+
+<section><div class="challenge"><h2>🎯 Today's mini challenge</h2><p>Need a reason to play? Get a random challenge for your team.</p><button onclick="newChallenge()">Give me one</button><p id="challengeText">Press the button. Don't overthink it.</p></div></section>
+
+<section id="booking"><h2>Book a slot</h2><p class="note">Four steps. Your booking stays in this browser.</p>
+<div class="book">
+<div class="steps"><span id="line1" class="active"></span><span id="line2"></span><span id="line3"></span><span id="line4"></span></div>
+
+<div id="step1" class="step show"><h3>Your details</h3><label>Name</label><input id="name" placeholder="Captain name"><label>Phone</label><input id="phone" maxlength="10" inputmode="numeric" placeholder="10 digit number" oninput="digits(this)"><label>Age</label><input id="age" type="number" min="5" max="100" placeholder="Age"><p id="error1" class="error"></p></div>
+
+<div id="step2" class="step"><h3>Choose a ground</h3><label>Sport</label><select id="sport" onchange="loadGrounds()"><option value="">Choose sport</option><option value="cricket">Cricket</option><option value="football">Football</option><option value="badminton">Badminton</option><option value="kabaddi">Kabaddi</option><option value="volleyball">Volleyball</option></select><label>Ground</label><div id="groundList" class="ground-list"></div><p id="error2" class="error"></p></div>
+
+<div id="step3" class="step"><h3>Choose the time</h3><label>Date</label><input id="date" type="date" onchange="loadSlots()"><label>Free slots</label><div id="slotList" class="slot-list"></div><div class="total">Amount: ₹<b id="amount">0</b></div><p id="error3" class="error"></p></div>
+
+<div id="step4" class="step"><h3>Finish it</h3><label>Payment method</label><select id="payment"><option value="">Choose payment</option><option>Wallet</option><option>UPI</option><option>PhonePe</option><option>Google Pay</option></select><label>Quick check</label><div id="captcha" style="padding:12px;background:#183d2b;color:#d9ed70;text-align:center;letter-spacing:5px;font-weight:bold"></div><input id="captchaInput" placeholder="Type the code"><div class="total">Pay: ₹<b id="finalAmount">0</b></div><p id="error4" class="error"></p></div>
+
+<div class="form-buttons"><button id="back" class="back" onclick="backStep()">Back</button><button id="next" class="next" onclick="nextStep()">Next</button><button id="confirm" class="confirm hide" onclick="bookNow()">Confirm booking</button></div><p id="bookingMsg"></p>
+</div></section>
+
+<section><div class="two">
+<div class="card"><h3>My wallet</h3><div style="font-size:30px;font-weight:bold;color:var(--g)">₹<span id="wallet">250</span></div><p class="note">Demo balance for testing.</p><button onclick="addWallet()">Add ₹500</button></div>
+<div class="card"><h3>My team</h3><input id="teamName" placeholder="Team name"><input id="teamSport" placeholder="Sport" style="margin-top:7px"><button onclick="saveTeam()">Save team</button><div id="teamList"></div></div>
+</div></section>
+
+<section><h2>Today's timetable</h2><p class="note">Booked slots are marked in red.</p><div class="table-box"><table><thead><tr><th>Time</th><th>Pitch A</th><th>Pitch B</th><th>Football Turf</th><th>Court 1</th></tr></thead><tbody id="table"></tbody></table></div></section>
+
+<section id="historySection" class="hide"><h2>My booking history</h2><div id="historyList"></div></section>
+</div>
+<footer>Net Grounds · Play more, wait less.</footer>
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<div id="profile"><div class="profile-box"><h2 id="profileName">Captain</h2><p id="profilePhone"></p><p id="profileBookings"></p><button onclick="closeProfile()">Close</button></div></div>
 
 <script>
-// ===================================================
-// config / constants
-// ===================================================
-
-const ADMIN_PW     = "Admin@12345";
-const RATE_PER_MIN = 10;
-
-// all time slots we offer
-const SLOTS = [
-  ["06:00","07:00"],["07:00","08:00"],["08:00","09:00"],
-  ["09:00","10:00"],["10:00","11:00"],["16:00","17:00"],
-  ["17:00","18:00"],["18:00","19:00"],["19:00","20:00"],
-  ["20:00","21:00"],["21:00","22:00"]
-];
-
-const GROUNDS = {
-  cricket:    [
-    { name:"Pitch A",  img:"https://images.unsplash.com/photo-1531415074968-036ba1b575da" },
-    { name:"Pitch B",  img:"https://images.unsplash.com/photo-1540747913346-19e32dc3e97e" },
-    { name:"Pitch C",  img:"https://images.unsplash.com/photo-1531415074968-036ba1b575da" }
-  ],
-  shuttle:    [
-    { name:"Court 1",  img:"https://images.unsplash.com/photo-1626224583764-f87db24ac4ea" },
-    { name:"Court 2",  img:"https://images.unsplash.com/photo-1626224583764-f87db24ac4ea" }
-  ],
-  football:   [
-    { name:"Ground 1", img:"https://images.unsplash.com/photo-1579952363873-27f3bade9f55" },
-    { name:"Ground 2", img:"https://images.unsplash.com/photo-1579952363873-27f3bade9f55" }
-  ],
-  kabaddi:    [{ name:"Kabaddi Court 1",  img:"https://images.unsplash.com/photo-1546519638-68e109498ffc" }],
-  hockey:     [{ name:"Hockey Ground 1", img:"https://images.unsplash.com/photo-1517466787929-bc90951d0974" }],
-  volleyball: [{ name:"Volley Court 1",  img:"https://images.unsplash.com/photo-1612872087720-bb876e2e67d1" }]
+const RATE=10;
+const slotTimes=[["06:00","07:00"],["07:00","08:00"],["08:00","09:00"],["09:00","10:00"],["10:00","11:00"],["16:00","17:00"],["17:00","18:00"],["18:00","19:00"],["19:00","20:00"],["20:00","21:00"],["21:00","22:00"]];
+const grounds={
+cricket:[["Pitch A"],["Pitch B"],["Pitch C"]],
+football:[["Football Turf"],["Turf 2"]],
+badminton:[["Court 1"],["Court 2"]],
+kabaddi:[["Kabaddi Court"]],
+volleyball:[["Volley Court"]]
 };
+let currentUser=null,otpCode="",currentStep=1,pickedGround="",pickedSlot=null,captchaCode="";
 
-// ===================================================
-// app state
-// ===================================================
+function $(id){return document.getElementById(id)}
+function digits(el){el.value=el.value.replace(/\D/g,"").slice(0,el.maxLength||10)}
+function read(key,fallback){try{return JSON.parse(localStorage.getItem(key))||fallback}catch(e){return fallback}}
+function write(key,value){localStorage.setItem(key,JSON.stringify(value))}
+function today(){return new Date().toISOString().slice(0,10)}
+function go(id){$(id).scrollIntoView({behavior:"smooth"})}
 
-let user          = null;
-let step          = 1;
-let adminOpen     = false;
-let adminUnlocked = false;
-let otp           = "";
-let captchaCode   = "";
-let discount      = 0;
-let coupons       = [];
-let wallet        = 250;
-let mapLoaded     = false;
-let firstLogin    = true;
-
-// ===================================================
-// tiny helpers
-// ===================================================
-
-// XSS protection - always escape user content before putting it in HTML
-function esc(s) {
-  return String(s)
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
+function sendOtp(){
+  const phone=$("loginPhone").value;
+  if(phone.length!==10){$("loginMsg").textContent="Enter a 10 digit number.";return}
+  otpCode=String(Math.floor(100000+Math.random()*900000));
+  $("otpArea").classList.remove("hide");
+  $("loginMsg").textContent="Demo OTP: "+otpCode;
 }
-
-function toast(msg, type = "note") {
-  const box = document.getElementById("toasts");
-  const t   = document.createElement("div");
-  t.className = `toast ${type}`;
-  t.textContent = msg;
-  box.appendChild(t);
-  setTimeout(() => {
-    t.style.opacity = "0";
-    t.style.transition = "opacity .25s";
-    setTimeout(() => t.remove(), 280);
-  }, 3200);
+function verifyOtp(){
+  if($("otp").value!==otpCode){$("loginMsg").textContent="Wrong OTP.";return}
+  currentUser={name:"Phone Captain",phone:$("loginPhone").value};openApp()
 }
-
-function getBookings()    { return JSON.parse(localStorage.getItem("bookings")    || "[]"); }
-function getMaintenance() { return JSON.parse(localStorage.getItem("maintenance") || "[]"); }
-function saveBookings(b)  { localStorage.setItem("bookings", JSON.stringify(b)); }
-
-// ===================================================
-// AUTH
-// ===================================================
-
-function quickDemo() {
-  user = { name: "Demo Captain", phone: "9876543210" };
-  checkFirstLogin();
-  bootApp();
-  toast("Logged in as Demo Captain!", "ok");
+function demoLogin(){currentUser={name:"Demo Captain",phone:"9876543210"};openApp()}
+function openApp(){
+  $("login").classList.add("hide");$("app").classList.remove("hide");
+  $("name").value=currentUser.name;$("phone").value=currentUser.phone;
+  $("date").min=today();$("date").value=today();
+  updateWallet();updateTeams();updateHistory();updateTable();updateStreak();makeCaptcha();showStep()
 }
+function logout(){currentUser=null;$("app").classList.add("hide");$("login").classList.remove("hide")}
+function chooseSport(sport){$("sport").value=sport;loadGrounds();currentStep=2;showStep();go("booking")}
 
-function loginGoogle()  { toast("Google sign-in needs a backend setup.", "note"); }
-function loginFB()      { toast("Facebook sign-in needs a backend setup.", "note"); }
-
-function sendOTP() {
-  const ph = document.getElementById("phoneInput").value.trim();
-  if (!/^\d{10}$/.test(ph)) {
-    setLoginErr("Enter a valid 10-digit number.");
-    return;
-  }
-  otp = String(Math.floor(100000 + Math.random() * 900000));
-  document.getElementById("otpSection").style.display = "block";
-  const hint = document.getElementById("otpHint");
-  hint.style.display = "block";
-  hint.textContent   = `Demo OTP: ${otp}`;
-  setLoginErr("OTP sent!");
+function loadGrounds(){
+  const sport=$("sport").value,list=$("groundList");pickedGround="";pickedSlot=null;list.innerHTML="";
+  if(!sport)return;
+  grounds[sport].forEach(item=>{
+    const b=document.createElement("button");b.type="button";b.className="ground-btn";
+    b.innerHTML="<b>"+item[0]+"</b><br><small>₹10/min</small>";
+    b.onclick=function(){document.querySelectorAll(".ground-btn").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");pickedGround=item[0];loadSlots()};
+    list.appendChild(b)
+  })
 }
-
-function checkOTP() {
-  const entered = document.getElementById("otpInput").value.trim();
-  if (entered !== otp) {
-    setLoginErr("Wrong OTP, try again.");
-    return;
-  }
-  user = { name: "Phone User", phone: document.getElementById("phoneInput").value };
-  checkFirstLogin();
-  bootApp();
-  toast("Verified successfully!", "ok");
+function loadSlots(){
+  const list=$("slotList");list.innerHTML="";pickedSlot=null;
+  if(!pickedGround||!$("date").value){list.innerHTML="<p class='note'>Pick a ground and date first.</p>";return}
+  slotTimes.forEach(slot=>{
+    const b=document.createElement("button");b.type="button";b.className="slot-btn";b.textContent=slot[0]+" - "+slot[1];
+    if(alreadyBooked($("date").value,pickedGround,slot)){b.classList.add("used");b.disabled=true;b.textContent+=" Booked"}
+    else b.onclick=function(){document.querySelectorAll(".slot-btn").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");pickedSlot=slot;$("amount").textContent=price()};
+    list.appendChild(b)
+  })
 }
-
-function setLoginErr(msg) {
-  document.getElementById("loginErr").textContent = msg;
+function alreadyBooked(date,ground,slot){return read("bookings",[]).some(b=>b.date===date&&b.ground===ground&&b.start===slot[0]&&b.end===slot[1]&&b.status!=="Cancelled")}
+function price(){
+  if(!pickedSlot)return 0;
+  let total=60,day=new Date($("date").value+"T12:00:00").getDay();
+  if(day===0||day===6)total=Math.round(total*.9);
+  if(read("bookings",[]).length===0)total=Math.round(total*.9);
+  return total
 }
-
-function checkFirstLogin() {
-  const last  = localStorage.getItem("lastSeen");
-  const today = new Date().toDateString();
-  firstLogin  = last !== today;
-  if (firstLogin) localStorage.setItem("lastSeen", today);
+function nextStep(){
+  if(currentStep===1){if(!$("name").value.trim()||$("phone").value.length!==10||!$("age").value){$("error1").textContent="Fill in your name, phone and age.";return}$("error1").textContent=""}
+  if(currentStep===2){if(!pickedGround){$("error2").textContent="Choose a ground.";return}$("error2").textContent="";loadSlots()}
+  if(currentStep===3){if(!pickedSlot){$("error3").textContent="Choose a free slot.";return}$("error3").textContent="";makeCaptcha();$("finalAmount").textContent=price()}
+  if(currentStep<4)currentStep++;showStep()
 }
-
-function bootApp() {
-  document.getElementById("loginWrap").style.display = "none";
-  document.getElementById("app").style.display = "block";
-  document.getElementById("navUser").textContent = user?.name || "Captain";
-
-  // load persisted data
-  coupons = JSON.parse(localStorage.getItem("userCoupons") || "[]");
-  wallet  = Number(localStorage.getItem("walletBal") || 250);
-  syncWalletDisplay();
-
-  buildLeaderboard();
-  buildTeamList();
-  buildTimetable();
-  buildReviews();
-  loadMap();
+function backStep(){if(currentStep>1)currentStep--;showStep()}
+function showStep(){
+  for(let i=1;i<=4;i++){$("step"+i).classList.toggle("show",i===currentStep);$("line"+i).classList.toggle("active",i<=currentStep)}
+  $("back").style.display=currentStep===1?"none":"block";$("next").classList.toggle("hide",currentStep===4);$("confirm").classList.toggle("hide",currentStep!==4)
 }
-
-function logout() {
-  user          = null;
-  adminUnlocked = false;
-  adminOpen     = false;
-  step          = 1;
-  document.getElementById("app").style.display        = "none";
-  document.getElementById("loginWrap").style.display  = "flex";
-  document.getElementById("adminSection").style.display = "none";
-  document.getElementById("adminPanel").style.display   = "none";
-  document.getElementById("adminLoginBox").style.display = "block";
-  toast("Signed out.", "note");
+function makeCaptcha(){
+  const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";captchaCode="";
+  for(let i=0;i<5;i++)captchaCode+=chars[Math.floor(Math.random()*chars.length)];
+  $("captcha").textContent=captchaCode
 }
-
-// ===================================================
-// THEME
-// ===================================================
-
-function toggleDark() {
-  document.body.classList.toggle("dark");
-  const on = document.body.classList.contains("dark");
-  localStorage.setItem("dark", on ? "1" : "0");
-  // update icon
-  document.querySelector("nav .nav-btns button").textContent = on ? "☀️" : "🌙";
+function bookNow(){
+  if(!$("payment").value){$("error4").textContent="Choose a payment method.";return}
+  if($("captchaInput").value.trim().toUpperCase()!==captchaCode){$("error4").textContent="Captcha is not correct.";return}
+  if(alreadyBooked($("date").value,pickedGround,pickedSlot)){$("error4").textContent="Someone just booked that slot.";loadSlots();return}
+  const total=price();
+  if($("payment").value==="Wallet"&&Number(localStorage.getItem("wallet")||250)<total){$("error4").textContent="Not enough wallet balance.";return}
+  const bookings=read("bookings",[]);
+  bookings.push({id:Date.now(),name:$("name").value.trim(),phone:$("phone").value,date:$("date").value,sport:$("sport").value,ground:pickedGround,start:pickedSlot[0],end:pickedSlot[1],amount:total,payment:$("payment").value,status:"Confirmed"});
+  write("bookings",bookings);
+  if($("payment").value==="Wallet")localStorage.setItem("wallet",Number(localStorage.getItem("wallet")||250)-total);
+  localStorage.setItem("streak",Number(localStorage.getItem("streak")||0)+1);
+  $("bookingMsg").innerHTML="<b style='color:#28763e'>Booking confirmed. See you on the ground!</b>";
+  updateWallet();updateHistory();updateTable();updateStreak();
+  currentStep=1;pickedSlot=null;$("payment").value="";$("captchaInput").value="";$("amount").textContent="0";showStep()
 }
-
-if (localStorage.getItem("dark") === "1") {
-  document.body.classList.add("dark");
+function addWallet(){localStorage.setItem("wallet",Number(localStorage.getItem("wallet")||250)+500);updateWallet()}
+function updateWallet(){$("wallet").textContent=Number(localStorage.getItem("wallet")||250)}
+function saveTeam(){
+  const name=$("teamName").value.trim(),sport=$("teamSport").value.trim();if(!name||!sport)return;
+  const teams=read("teams",[]);teams.push({name,sport});write("teams",teams);$("teamName").value="";$("teamSport").value="";updateTeams()
 }
-
-// ===================================================
-// PROFILE
-// ===================================================
-
-function openProfile() {
-  const m = document.getElementById("profileModal");
-  m.style.display = "grid";
-  document.getElementById("pmName").textContent  = user?.name  || "Captain";
-  document.getElementById("pmPhone").textContent = user?.phone || "9876543210";
-  document.getElementById("pmAvatar").textContent = (user?.name || "C")[0].toUpperCase();
-  buildBadges();
+function updateTeams(){
+  const teams=read("teams",[]);
+  $("teamList").innerHTML=teams.length?teams.map(t=>"<div class='team-item'><b>"+safe(t.name)+"</b> · "+safe(t.sport)+"</div>").join(""):"<p class='note'>No team yet.</p>"
 }
-
-function closeProfile() {
-  document.getElementById("profileModal").style.display = "none";
+function updateHistory(){
+  const mine=read("bookings",[]).filter(b=>currentUser&&b.phone===currentUser.phone);
+  $("historyList").innerHTML=mine.length?mine.slice().reverse().map(b=>"<div class='history-item'><b>"+safe(b.ground)+"</b><br>"+safe(b.date)+" · "+safe(b.start)+"-"+safe(b.end)+" · ₹"+b.amount+"</div>").join(""):"<p class='note'>No bookings yet.</p>"
 }
-
-function buildBadges() {
-  const bookings = getBookings();
-  const row = document.getElementById("pmBadges");
-  let html = `<span class="badge">🥉 First Match</span>`;
-  if (bookings.length >= 3) html += `<span class="badge">🥈 3+ Bookings</span>`;
-  if (bookings.length >= 5) html += `<span class="badge">🥇 Pro Captain</span>`;
-  const d = new Date().getDay();
-  if (d === 0 || d === 6) html += `<span class="badge">🔥 Weekend Warrior</span>`;
-  row.innerHTML = html;
+function showHistory(){$("historySection").classList.remove("hide");updateHistory();go("historySection")}
+function updateTable(){
+  const show=["Pitch A","Pitch B","Football Turf","Court 1"];
+  $("table").innerHTML=slotTimes.map(slot=>{
+    let row="<tr><td>"+slot[0]+"-"+slot[1]+"</td>";
+    show.forEach(g=>row+=alreadyBooked(today(),g,slot)?"<td class='booked'>Booked</td>":"<td class='free'>Free</td>");
+    return row+"</tr>"
+  }).join("")
 }
-
-// ===================================================
-// AI ASSISTANT
-// ===================================================
-
-function aiAsk() {
-  const q    = document.getElementById("aiInput").value.trim().toLowerCase();
-  const box  = document.getElementById("chatArea");
-  if (!q) return;
-
-  box.innerHTML += `<div class="msg user">${esc(q)}</div>`;
-  document.getElementById("aiInput").value = "";
-
-  // simple pattern matching - could hook to a real API later
-  let reply = "I found Pitch A (cricket) and Ground 1 (football) free for your timing!";
-  if (q.includes("cricket") || q.includes("pitch")) {
-    reply = "🏏 Pitch A & B are available with floodlights. Great turf condition today!";
-  } else if (q.includes("football") || q.includes("turf")) {
-    reply = "⚽ Ground 1 is free this evening. FIFA-standard grass and lights included.";
-  } else if (q.includes("cheap") || q.includes("budget") || q.includes("under")) {
-    reply = "💰 All grounds are ₹10/min. Use code WEEKEND10 for extra 10% off!";
-  } else if (q.includes("shuttle") || q.includes("badminton")) {
-    reply = "🏸 Court 1 & 2 are both open today. Indoor courts, good AC.";
-  }
-
-  setTimeout(() => {
-    box.innerHTML += `<div class="msg bot">${reply}</div>`;
-    box.scrollTop = box.scrollHeight;
-  }, 500);
+/* New feature 1: random game picker */
+function randomGame(){
+  const names=Object.keys(grounds),sport=names[Math.floor(Math.random()*names.length)],ground=grounds[sport][0][0];
+  $("challengeText").textContent="Random pick: "+sport+" at "+ground+". Give it a try!";
+  chooseSport(sport)
 }
-
-// ===================================================
-// SPIN WHEEL
-// ===================================================
-
-let totalSpin  = 0;
-let spinUsed   = false;
-
-function doSpin() {
-  if (spinUsed) {
-    toast("One spin per day — come back tomorrow!", "bad");
-    return;
-  }
-
-  spinUsed = true;
-
-  const prizes = [
-    { label: "10% OFF", pct: 0.10 },
-    { label: "30% OFF", pct: 0.30 },
-    { label: "50% OFF", pct: 0.50 },
-    { label: "20% OFF", pct: 0.20 }
-  ];
-
-  const idx = Math.floor(Math.random() * prizes.length);
-  totalSpin += 1440 + idx * 90; // spin a few full rounds then land on prize
-
-  document.getElementById("wheel").style.transform = `rotate(${totalSpin}deg)`;
-
-  setTimeout(() => {
-    const p = prizes[idx];
-    document.getElementById("spinResult").textContent = `You won ${p.label}! Applied automatically.`;
-    coupons.push({ code: `SPIN${Math.round(p.pct*100)}`, discount: p.pct, ts: Date.now() });
-    localStorage.setItem("userCoupons", JSON.stringify(coupons));
-    discount = Math.max(discount, p.pct);
-    toast(`🎉 You won ${p.label}!`, "ok");
-  }, 3100);
+/* New feature 2: simple team challenge */
+function newChallenge(){
+  const list=["Play one match without checking your phone.","Let the newest player choose the teams.","Do a 10 minute warm-up first.","Winner buys the post-match snacks.","Give your best player a silly nickname.","Take one team photo before leaving."];
+  $("challengeText").textContent=list[Math.floor(Math.random()*list.length)]
 }
-
-// ===================================================
-// LEADERBOARD
-// ===================================================
-
-function buildLeaderboard() {
-  // hardcoded sample data for now - in prod this would come from an API
-  const data = [
-    { rank:1, name:"Rahul Sharma",  bookings:14, wins:11, badge:"👑 Legend"  },
-    { rank:2, name:"Vikram Singh",  bookings:11, wins:9,  badge:"🔥 Striker" },
-    { rank:3, name:"Amit Patel",    bookings:8,  wins:6,  badge:"⭐ Elite"   },
-    { rank:4, name:"Demo Captain",  bookings:5,  wins:4,  badge:"⚡ Active"  }
-  ];
-
-  const tbody = document.getElementById("lbBody");
-  tbody.innerHTML = "";
-  data.forEach(r => {
-    tbody.innerHTML += `
-      <tr>
-        <td>#${r.rank}</td>
-        <td><b>${esc(r.name)}</b></td>
-        <td>${r.bookings}</td>
-        <td>${r.wins}</td>
-        <td>${r.badge}</td>
-      </tr>
-    `;
-  });
+function showProfile(){
+  const mine=read("bookings",[]).filter(b=>currentUser&&b.phone===currentUser.phone);
+  $("profileName").textContent=currentUser.name;$("profilePhone").textContent="Phone: "+currentUser.phone;$("profileBookings").textContent="Bookings made: "+mine.length;$("profile").style.display="grid"
 }
-
-// ===================================================
-// TEAMS
-// ===================================================
-
-function saveTeam() {
-  const name  = document.getElementById("tName").value.trim();
-  const sport = document.getElementById("tSport").value.trim();
-  const fb    = document.getElementById("teamFeedback");
-
-  if (!name || !sport) {
-    fb.style.color  = "red";
-    fb.textContent  = "Enter both team name and sport.";
-    return;
-  }
-
-  const teams = JSON.parse(localStorage.getItem("myTeams") || "[]");
-  teams.push({ name, sport });
-  localStorage.setItem("myTeams", JSON.stringify(teams));
-
-  document.getElementById("tName").value  = "";
-  document.getElementById("tSport").value = "";
-  fb.style.color  = "green";
-  fb.textContent  = "Team saved!";
-
-  buildTeamList();
-  toast("Team created successfully!", "ok");
-}
-
-function buildTeamList() {
-  const el    = document.getElementById("teamsList");
-  const teams = JSON.parse(localStorage.getItem("myTeams") || "[]");
-
-  if (!teams.length) {
-    el.innerHTML = "<p style='color:#999;'>No teams yet — create one!</p>";
-    return;
-  }
-
-  el.innerHTML = "";
-  teams.forEach(t => {
-    el.innerHTML += `
-      <div style="padding:6px 0; border-bottom:1px solid var(--line);">
-        🛡️ <b>${esc(t.name)}</b> &nbsp;·&nbsp; ${esc(t.sport)}
-      </div>
-    `;
-  });
-}
-
-// ===================================================
-// WALLET
-// ===================================================
-
-function syncWalletDisplay() {
-  document.getElementById("walletAmt").textContent         = wallet;
-  document.getElementById("walletPayDisplay").textContent  = wallet;
-}
-
-function topUpWallet() {
-  wallet += 500;
-  localStorage.setItem("walletBal", wallet);
-  syncWalletDisplay();
-  toast("₹500 added to your wallet!", "ok");
-}
-
-function copyRef() {
-  navigator.clipboard?.writeText("https://netgrounds.app/ref/USER99");
-  toast("Referral link copied!", "ok");
-}
-
-// ===================================================
-// WEATHER
-// ===================================================
-
-function refreshWeather() {
-  const options = [
-    { city:"🌤️ CLEAR",   text:"29°C • Perfect day for cricket!" },
-    { city:"⛅ CLOUDY",  text:"24°C • Comfortable with a breeze." },
-    { city:"☀️ SUNNY",   text:"31°C • Warm out. Carry water!" }
-  ];
-  const pick = options[Math.floor(Math.random() * options.length)];
-  document.getElementById("wCity").textContent = pick.city;
-  document.getElementById("wText").textContent = pick.text;
-  toast("Weather refreshed.", "note");
-}
-
-// ===================================================
-// MAP
-// ===================================================
-
-let leafMap;
-
-function loadMap() {
-  if (mapLoaded) return;
-  mapLoaded = true;
-
-  leafMap = L.map("mapDiv").setView([28.61, 77.23], 12);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "© OpenStreetMap contributors"
-  }).addTo(leafMap);
-
-  const pins = [
-    { name:"Premium Cricket Pitch",  lat:28.62, lng:77.22, sport:"Cricket"   },
-    { name:"Football Turf Arena",    lat:28.60, lng:77.24, sport:"Football"  },
-    { name:"Badminton Court Block",  lat:28.63, lng:77.21, sport:"Shuttle"   }
-  ];
-
-  pins.forEach(p => {
-    L.marker([p.lat, p.lng])
-      .addTo(leafMap)
-      .bindPopup(`<b>${p.name}</b><br>${p.sport}`);
-  });
-}
-
-function getLocation() {
-  const el = document.getElementById("locText");
-  if (!navigator.geolocation) {
-    el.textContent = "Geolocation not supported by your browser.";
-    return;
-  }
-  el.textContent = "Finding your location...";
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      el.textContent = `Found you: ${pos.coords.latitude.toFixed(3)}, ${pos.coords.longitude.toFixed(3)}`;
-      toast("Nearby grounds located!", "ok");
-    },
-    () => { el.textContent = "Location permission was denied."; }
-  );
-}
-
-// ===================================================
-// ADMIN
-// ===================================================
-
-function openAdmin() {
-  adminOpen = !adminOpen;
-  const el = document.getElementById("adminSection");
-  el.style.display = adminOpen ? "block" : "none";
-  if (adminOpen) el.scrollIntoView({ behavior:"smooth" });
-}
-
-function unlockAdmin() {
-  const pw = document.getElementById("adminPass").value;
-  if (pw !== ADMIN_PW) {
-    document.getElementById("adminErrMsg").textContent = "Incorrect password.";
-    return;
-  }
-  adminUnlocked = true;
-  document.getElementById("adminLoginBox").style.display = "none";
-  document.getElementById("adminPanel").style.display    = "block";
-  refreshAdmin();
-  toast("Admin panel unlocked.", "ok");
-}
-
-function refreshAdmin() {
-  if (!adminUnlocked) return;
-
-  const bookings = getBookings();
-  const reviews  = JSON.parse(localStorage.getItem("reviews") || "[]");
-  const tbody    = document.getElementById("adminTbl");
-
-  tbody.innerHTML = "";
-  let revenue = 0;
-
-  bookings.forEach((b, i) => {
-    revenue += Number(b.amount || 0);
-    tbody.innerHTML += `
-      <tr>
-        <td>${i+1}</td>
-        <td>${esc(b.name)}</td>
-        <td>${esc(b.phone)}</td>
-        <td>${b.date}</td>
-        <td>${esc(b.sport)}</td>
-        <td>${esc(b.ground)}</td>
-        <td>${b.start} – ${b.end}</td>
-        <td>₹${b.amount}</td>
-        <td>${esc(b.payment)}</td>
-        <td><button class="del-btn" onclick="removeBooking(${i})">Delete</button></td>
-      </tr>
-    `;
-  });
-
-  document.getElementById("sTotalBook").textContent = bookings.length;
-  document.getElementById("sRevenue").textContent   = "₹" + revenue;
-  document.getElementById("sReviews").textContent   = reviews.length;
-  document.getElementById("noDataMsg").style.display = bookings.length ? "none" : "block";
-}
-
-function removeBooking(i) {
-  const b = getBookings();
-  b.splice(i, 1);
-  saveBookings(b);
-  refreshAdmin();
-  buildTimetable();
-  toast("Booking removed.", "note");
-}
-
-function blockSlot() {
-  const date   = document.getElementById("mDate").value;
-  const ground = document.getElementById("mGround").value;
-  const slot   = document.getElementById("mSlot").value;
-
-  if (!date || !ground || !slot) {
-    alert("Select date, ground, and slot.");
-    return;
-  }
-
-  const [s, e] = slot.split("|");
-  const list   = getMaintenance();
-  list.push({ date, ground, start:s, end:e });
-  localStorage.setItem("maintenance", JSON.stringify(list));
-
-  toast("Maintenance slot blocked.", "ok");
-  buildTimetable();
-  refreshSlots();
-}
-
-// populate maintenance slot select
-function populateMSlots() {
-  const sel = document.getElementById("mSlot");
-  SLOTS.forEach(([s, e]) => {
-    sel.innerHTML += `<option value="${s}|${e}">${s} – ${e}</option>`;
-  });
-}
-populateMSlots();
-
-// ===================================================
-// BOOKING FLOW
-// ===================================================
-
-function showGrounds() {
-  const sport  = document.getElementById("sportPick").value;
-  const grid   = document.getElementById("groundGrid");
-  grid.innerHTML = "";
-  document.getElementById("chosenGround").value = "";
-
-  const list = GROUNDS[sport] || [];
-  list.forEach(g => {
-    grid.innerHTML += `
-      <div class="gcard" onclick="pickGround(this, '${esc(g.name)}')">
-        <img
-          src="${g.img}"
-          onerror="this.src='https://placehold.co/300x180?text=Ground'"
-          alt="${g.name}"
-        >
-        <p>${esc(g.name)}</p>
-        <small>● Available</small>
-      </div>
-    `;
-  });
-
-  refreshSlots();
-}
-
-function pickGround(el, name) {
-  document.querySelectorAll(".gcard").forEach(c => c.classList.remove("picked"));
-  el.classList.add("picked");
-  document.getElementById("chosenGround").value = name;
-  refreshSlots();
-}
-
-function isBooked(date, ground, start, end) {
-  return getBookings().some(b =>
-    b.date   === date   &&
-    b.ground === ground &&
-    b.start  === start  &&
-    b.end    === end    &&
-    b.status !== "Cancelled"
-  );
-}
-
-function isMaintenance(date, ground, start, end) {
-  return getMaintenance().some(m =>
-    m.date   === date   &&
-    m.ground === ground &&
-    m.start  === start  &&
-    m.end    === end
-  );
-}
-
-function refreshSlots() {
-  const date   = document.getElementById("bDate").value;
-  const ground = document.getElementById("chosenGround").value;
-  const grid   = document.getElementById("slotGrid");
-  const hint   = document.getElementById("slotHint");
-
-  grid.innerHTML = "";
-  document.getElementById("pickedSlot").value = "";
-  document.getElementById("bStart").value     = "";
-  document.getElementById("bEnd").value       = "";
-  document.getElementById("calcAmount").textContent = "0";
-
-  if (!date || !ground) {
-    hint.textContent = "Choose a date and ground to see slots.";
-    return;
-  }
-
-  hint.textContent = "Select an available slot below.";
-
-  SLOTS.forEach(([s, e]) => {
-    const booked = isBooked(date, ground, s, e);
-    const maint  = isMaintenance(date, ground, s, e);
-    const btn    = document.createElement("button");
-    btn.type     = "button";
-    btn.className = "slot-btn";
-
-    if (booked) {
-      btn.classList.add("taken");
-      btn.textContent = `${s}–${e} Booked`;
-      btn.disabled    = true;
-    } else if (maint) {
-      btn.classList.add("blocked");
-      btn.textContent = `${s}–${e} Closed`;
-      btn.disabled    = true;
-    } else {
-      btn.textContent = `${s}–${e} Free`;
-      btn.onclick = () => {
-        document.querySelectorAll(".slot-btn").forEach(b => b.classList.remove("chosen"));
-        btn.classList.add("chosen");
-        document.getElementById("bStart").value     = s;
-        document.getElementById("bEnd").value       = e;
-        document.getElementById("pickedSlot").value = `${s}-${e}`;
-        calcTotal();
-      };
-    }
-
-    grid.appendChild(btn);
-  });
-}
-
-function buildTimetable() {
-  const tbody   = document.getElementById("ttBody");
-  if (!tbody) return;
-
-  const date    = document.getElementById("bDate")?.value || new Date().toISOString().split("T")[0];
-  const grounds = ["Pitch A","Pitch B","Ground 1","Court 1"];
-
-  tbody.innerHTML = "";
-
-  SLOTS.forEach(([s, e]) => {
-    let row = `<tr><td>${s}–${e}</td>`;
-    grounds.forEach(g => {
-      if      (isBooked(date, g, s, e))       row += `<td class="bk">Booked</td>`;
-      else if (isMaintenance(date, g, s, e))  row += `<td class="mn">Closed</td>`;
-      else                                     row += `<td class="av">Free</td>`;
-    });
-    row += "</tr>";
-    tbody.innerHTML += row;
-  });
-}
-
-// set date input bounds
-const TODAY = new Date().toISOString().split("T")[0];
-document.getElementById("bDate").min    = TODAY;
-document.getElementById("mDate").min    = TODAY;
-document.getElementById("bDate").value  = TODAY;
-document.getElementById("bDate").addEventListener("change", () => {
-  refreshSlots();
-  buildTimetable();
-});
-
-// ===================================================
-// CAPTCHA
-// ===================================================
-
-function newCaptcha() {
-  const pool = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  captchaCode = "";
-  for (let i = 0; i < 5; i++) {
-    captchaCode += pool[Math.floor(Math.random() * pool.length)];
-  }
-  document.getElementById("captchaDisplay").textContent = captchaCode;
-}
-newCaptcha();
-
-// ===================================================
-// AMOUNT CALCULATION
-// ===================================================
-
-function calcTotal() {
-  const s = document.getElementById("bStart").value;
-  const e = document.getElementById("bEnd").value;
-  if (!s || !e) return;
-
-  const mins = (new Date(`1970-01-01T${e}`) - new Date(`1970-01-01T${s}`)) / 60000;
-  let base   = mins > 0 ? mins * RATE_PER_MIN : 0;
-
-  // apply discounts - weekend, first login, coupons/spin
-  discount = 0;
-  const day = new Date().getDay();
-  if (day === 0 || day === 6) discount = Math.max(discount, 0.10);
-  if (firstLogin)              discount = Math.max(discount, 0.15);
-  coupons.forEach(c => { discount = Math.max(discount, c.discount); });
-
-  const final = Math.round(base - base * discount);
-  document.getElementById("calcAmount").textContent = final;
-  document.getElementById("finalAmt").value         = final;
-}
-
-function useCoupon() {
-  const code = document.getElementById("couponInput").value.trim().toUpperCase();
-  const fb   = document.getElementById("couponFeedback");
-
-  if (code === "WEEKEND10") {
-    discount = Math.max(discount, 0.10);
-    fb.style.color  = "green";
-    fb.textContent  = "✓ Coupon applied — 10% off!";
-    calcTotal();
-    toast("Coupon applied!", "ok");
-  } else {
-    fb.style.color  = "red";
-    fb.textContent  = "Invalid code. Try WEEKEND10.";
-  }
-}
-
-// ===================================================
-// STEP NAVIGATION
-// ===================================================
-
-function goToStep(n) {
-  for (let i = 1; i <= 4; i++) {
-    document.getElementById("p"    + i).classList.toggle("on",  i === n);
-    document.getElementById("node" + i).classList.toggle("on",  i === n);
-    document.getElementById("node" + i).classList.toggle("done",i  < n);
-  }
-
-  document.getElementById("prevBtn").style.display   = n > 1 ? "block" : "none";
-  document.getElementById("nextBtn").style.display   = n < 4 ? "block" : "none";
-  document.getElementById("submitBtn").style.display = n === 4 ? "block" : "none";
-
-  document.querySelectorAll(".err-msg").forEach(e => e.style.display = "none");
-  step = n;
-}
-
-function showErr(id) { document.getElementById(id).style.display = "block"; }
-
-function goBack() { if (step > 1) goToStep(step - 1); }
-
-function goNext() {
-  if (step === 1) {
-    const name   = document.getElementById("fname").value.trim();
-    const phone  = document.getElementById("fphone").value.trim();
-    const age    = document.getElementById("fage").value;
-    const gender = document.getElementById("fgender").value;
-    if (!name || !/^\d{10}$/.test(phone) || !age || !gender) {
-      showErr("e1"); return;
-    }
-  }
-
-  if (step === 2) {
-    if (!document.getElementById("sportPick").value || !document.getElementById("chosenGround").value) {
-      showErr("e2"); return;
-    }
-  }
-
-  if (step === 3) {
-    if (!document.getElementById("bDate").value || !document.getElementById("pickedSlot").value) {
-      showErr("e3"); return;
-    }
-  }
-
-  goToStep(step + 1);
-}
-
-function maybeShowQR() {
-  const method = document.getElementById("payMethod").value;
-  const qrArea = document.getElementById("qrArea");
-  const qrImg  = document.getElementById("qrImg");
-
-  qrArea.style.display = "none";
-
-  if (method === "PhonePe" || method === "Google Pay") {
-    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=${encodeURIComponent(method)}`;
-    qrArea.style.display = "block";
-  }
-}
-
-// ===================================================
-// CONFIRM BOOKING
-// ===================================================
-
-function confirmBooking() {
-  const captchaAnswer = document.getElementById("captchaAnswer").value.trim().toUpperCase();
-  const method        = document.getElementById("payMethod").value;
-  const amount        = Number(document.getElementById("calcAmount").textContent);
-  const err           = document.getElementById("e4");
-
-  if (captchaAnswer !== captchaCode) {
-    err.textContent      = "⚠️ Captcha doesn't match — try again.";
-    err.style.display    = "block";
-    newCaptcha();
-    return;
-  }
-
-  if (!method) {
-    err.textContent   = "⚠️ Choose a payment method.";
-    err.style.display = "block";
-    return;
-  }
-
-  if (method === "Wallet") {
-    if (wallet < amount) {
-      err.textContent   = "⚠️ Not enough wallet balance.";
-      err.style.display = "block";
-      return;
-    }
-    wallet -= amount;
-    localStorage.setItem("walletBal", wallet);
-    syncWalletDisplay();
-  }
-
-  const booking = {
-    id:      Date.now(),
-    name:    document.getElementById("fname").value.trim(),
-    phone:   document.getElementById("fphone").value.trim(),
-    date:    document.getElementById("bDate").value,
-    sport:   document.getElementById("sportPick").value,
-    ground:  document.getElementById("chosenGround").value,
-    start:   document.getElementById("bStart").value,
-    end:     document.getElementById("bEnd").value,
-    amount,
-    payment: method,
-    status:  "Confirmed"
-  };
-
-  const all = getBookings();
-  all.push(booking);
-  saveBookings(all);
-
-  const msg = document.getElementById("bookingMsg");
-  msg.className   = "good";
-  msg.textContent = "✅ Booking confirmed! You'll receive a WhatsApp notification shortly.";
-
-  toast("Booking confirmed!", "ok");
-  buildTimetable();
-  if (adminUnlocked) refreshAdmin();
-
-  setTimeout(resetForm, 2600);
-}
-
-function resetForm() {
-  [
-    "fname","fphone","fage","fgender","sportPick",
-    "chosenGround","bStart","bEnd","pickedSlot",
-    "captchaAnswer","couponInput","payMethod","finalAmt"
-  ].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = "";
-  });
-
-  document.getElementById("groundGrid").innerHTML   = "";
-  document.getElementById("slotGrid").innerHTML     = "";
-  document.getElementById("calcAmount").textContent = "0";
-  document.getElementById("qrArea").style.display   = "none";
-  document.getElementById("bookingMsg").textContent  = "";
-
-  newCaptcha();
-  goToStep(1);
-}
-
-// ===================================================
-// HISTORY
-// ===================================================
-
-function openHistory() {
-  const el = document.getElementById("historySection");
-  const open = el.style.display === "block";
-  el.style.display = open ? "none" : "block";
-  if (!open) {
-    renderHistory();
-    el.scrollIntoView({ behavior:"smooth" });
-  }
-}
-
-function renderHistory() {
-  const list     = document.getElementById("historyItems");
-  const bookings = getBookings();
-
-  if (!bookings.length) {
-    list.innerHTML = "<p>No bookings yet.</p>";
-    return;
-  }
-
-  list.innerHTML = "";
-  bookings.forEach(b => {
-    list.innerHTML += `
-      <div class="h-card">
-        <h3>${esc(b.sport)} — ${esc(b.ground)}</h3>
-        <p>
-          📅 ${b.date} &nbsp;|&nbsp;
-          🕒 ${b.start}–${b.end} &nbsp;|&nbsp;
-          💰 ₹${b.amount} &nbsp;|&nbsp;
-          ${esc(b.payment)} &nbsp;|&nbsp;
-          <b>${esc(b.status)}</b>
-        </p>
-        ${b.status !== "Cancelled"
-          ? `<button class="cancel-btn" onclick="cancelBooking(${b.id})">Cancel</button>`
-          : ""}
-      </div>
-    `;
-  });
-}
-
-function cancelBooking(id) {
-  const updated = getBookings().map(b =>
-    b.id === id ? { ...b, status: "Cancelled" } : b
-  );
-  saveBookings(updated);
-  renderHistory();
-  buildTimetable();
-  toast("Booking cancelled.", "note");
-}
-
-// ===================================================
-// REVIEWS
-// ===================================================
-
-function postReview() {
-  const name   = document.getElementById("rvName").value.trim();
-  const rating = document.getElementById("rvRating").value;
-  const text   = document.getElementById("rvText").value.trim();
-
-  if (!name || !rating || !text) {
-    alert("Please fill all review fields.");
-    return;
-  }
-
-  const reviews = JSON.parse(localStorage.getItem("reviews") || "[]");
-  reviews.push({ name, rating: Number(rating), text });
-  localStorage.setItem("reviews", JSON.stringify(reviews));
-
-  document.getElementById("rvName").value   = "";
-  document.getElementById("rvRating").value = "";
-  document.getElementById("rvText").value   = "";
-
-  buildReviews();
-  toast("Review posted!", "ok");
-}
-
-function buildReviews() {
-  const el      = document.getElementById("reviewItems");
-  if (!el) return;
-  const reviews = JSON.parse(localStorage.getItem("reviews") || "[]");
-
-  if (!reviews.length) {
-    el.innerHTML = "<p style='text-align:center; color:#999;'>No reviews yet.</p>";
-    return;
-  }
-
-  el.innerHTML = "";
-  // show newest first
-  [...reviews].reverse().forEach(r => {
-    el.innerHTML += `
-      <div class="rv-card">
-        <strong>${esc(r.name)}</strong>
-        <div class="stars">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</div>
-        <p>${esc(r.text)}</p>
-      </div>
-    `;
-  });
-}
-
-// ===================================================
-// SCROLL HELPERS
-// ===================================================
-
-function goToBooking() {
-  document.getElementById("bookingForm").scrollIntoView({ behavior:"smooth" });
-}
-
-function goToMap() {
-  document.getElementById("mapSection").scrollIntoView({ behavior:"smooth" });
-}
-
-// ===================================================
-// INIT
-// ===================================================
-
-buildTimetable();
+function closeProfile(){$("profile").style.display="none"}
+function updateStreak(){$("streak").textContent=localStorage.getItem("streak")||0}
+function safe(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
 </script>
-
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
